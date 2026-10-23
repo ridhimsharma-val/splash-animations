@@ -2,27 +2,27 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Depth filter for sprinkle rendering, allowing sprinkles to pass
-/// both behind and in front of the 3D donut silhouette for true depth.
+/// both behind and in front of the 3D donut silhouette for genuine spatial depth.
 enum SprinkleDepthFilter {
   all,
   backgroundOnly,
   foregroundOnly,
 }
 
-/// Deterministic data model for a falling 3D candy sprinkle particle.
+/// Deterministic data model for a falling 3D candy sprinkle rod.
 class _CandySprinkleParticle {
-  final double startX; // Relative horizontal position [-180, 180]
+  final double startX; // Relative horizontal position [-170, 170]
   final double speed; // Fall speed multiplier
-  final double delay; // Normalized start time offset [0.0, 0.35]
+  final double delay; // Normalized start time offset [0.0, 0.32]
   final double rotationSpeedZ; // In-plane angular velocity
   final double initialAngleZ; // Starting in-plane rotation
   final double tumbleSpeedX; // 3D tumbling pitch velocity
   final double initialPitchX; // Starting 3D pitch tilt
-  final double length; // Length of the candy rod (e.g. 11–16 px)
-  final double thickness; // Diameter/thickness of the candy rod (e.g. 3.8–4.8 px)
+  final double length; // Length of the candy rod (11–17 px)
+  final double thickness; // Diameter of the candy rod (3.6–4.8 px)
   final double driftAmplitude; // Horizontal oscillation amplitude
   final double driftFrequency; // Oscillation speed
-  final Color color; // Pastel candy color
+  final Color color; // Pastel candy confectionery color
   final bool isForeground; // True if falling in front of the donut, false if behind
   final bool hasBounce; // Select particles that bounce slightly near bottom
 
@@ -45,7 +45,7 @@ class _CandySprinkleParticle {
 }
 
 /// Renders a graceful cascade of realistic 3D cylindrical candy sprinkles
-/// with cylindrical gradient shading, specular gloss highlights, rounded caps,
+/// with cylindrical gradient shading, specular gloss highlights, rounded ends,
 /// and accurate depth ordering around the donut.
 class SprinkleRainPainter extends CustomPainter {
   /// Progress of the sprinkle rain animation (0.0 to 1.0)
@@ -59,12 +59,12 @@ class SprinkleRainPainter extends CustomPainter {
 
   static List<_CandySprinkleParticle> _generateParticles() {
     const colors = [
-      Color(0xFFF58FB3), // Strawberry pink
-      Color(0xFF70E0D0), // Mint
-      Color(0xFFFFD166), // Yellow
-      Color(0xFFFF8B8B), // Coral
-      Color(0xFFDED2F9), // Lavender
-      Color(0xFF9AD0EC), // Sky Blue
+      Color(0xFFF7729F), // Vibrant strawberry pink
+      Color(0xFF4DD0E1), // Mint turquoise
+      Color(0xFFFFD54F), // Lemon candy yellow
+      Color(0xFFFF7A7A), // Coral confectionery
+      Color(0xFFB39DDB), // Lavender lilac
+      Color(0xFF81D4FA), // Sky blue sugar
     ];
 
     final list = <_CandySprinkleParticle>[];
@@ -73,16 +73,16 @@ class SprinkleRainPainter extends CustomPainter {
     for (int i = 0; i < 36; i++) {
       list.add(_CandySprinkleParticle(
         startX: (random.nextDouble() - 0.5) * 320.0,
-        speed: 0.82 + random.nextDouble() * 0.78,
-        delay: random.nextDouble() * 0.32,
-        rotationSpeedZ: (random.nextDouble() - 0.5) * 7.5,
+        speed: 0.85 + random.nextDouble() * 0.75,
+        delay: random.nextDouble() * 0.30,
+        rotationSpeedZ: (random.nextDouble() - 0.5) * 7.0,
         initialAngleZ: random.nextDouble() * math.pi * 2,
-        tumbleSpeedX: (random.nextDouble() - 0.5) * 9.0,
+        tumbleSpeedX: (random.nextDouble() - 0.5) * 8.5,
         initialPitchX: random.nextDouble() * math.pi,
         length: 11.5 + random.nextDouble() * 5.5,
-        thickness: 3.8 + random.nextDouble() * 1.0,
-        driftAmplitude: 6.0 + random.nextDouble() * 16.0,
-        driftFrequency: 1.8 + random.nextDouble() * 3.2,
+        thickness: 3.6 + random.nextDouble() * 1.0,
+        driftAmplitude: 6.0 + random.nextDouble() * 15.0,
+        driftFrequency: 1.8 + random.nextDouble() * 3.0,
         color: colors[i % colors.length],
         // Roughly half fall in front, half behind for realistic depth ordering
         isForeground: i % 2 == 0,
@@ -127,9 +127,9 @@ class SprinkleRainPainter extends CustomPainter {
       double curY = startY + (endY - startY) * (t * p.speed);
 
       // Bounce near lower edge for selected particles
-      if (p.hasBounce && t > 0.75) {
-        final bounceT = ((t - 0.75) / 0.25).clamp(0.0, 1.0);
-        final bounceHeight = 16.0 * math.sin(bounceT * math.pi);
+      if (p.hasBounce && t > 0.76) {
+        final bounceT = ((t - 0.76) / 0.24).clamp(0.0, 1.0);
+        final bounceHeight = 14.0 * math.sin(bounceT * math.pi);
         curY -= bounceHeight;
       }
 
@@ -153,7 +153,7 @@ class SprinkleRainPainter extends CustomPainter {
       // 3D perspective foreshortening along length as the candy rod tumbles
       final cosPitch = math.cos(curPitchX).abs();
       final visibleLength =
-          math.max(p.thickness * 1.15, p.length * (0.32 + 0.68 * cosPitch));
+          math.max(p.thickness * 1.15, p.length * (0.30 + 0.70 * cosPitch));
       final halfLength = visibleLength / 2;
       final halfThick = p.thickness / 2;
       final radius = Radius.circular(halfThick);
@@ -168,33 +168,33 @@ class SprinkleRainPainter extends CustomPainter {
         height: p.thickness,
       );
 
-      // 1. Soft contact micro shadow
+      // 1. Soft contact micro shadow beneath the cylinder
       final shadowRect = Rect.fromCenter(
-        center: const Offset(1.2, 1.8),
+        center: const Offset(1.2, 1.6),
         width: visibleLength,
         height: p.thickness,
       );
-      shadowPaint.color = Colors.black.withValues(alpha: 0.12 * alpha);
+      shadowPaint.color = Colors.black.withValues(alpha: 0.10 * alpha);
       canvas.drawRRect(
         RRect.fromRectAndRadius(shadowRect, radius),
         shadowPaint,
       );
 
-      // 2. 3D Cylindrical Shader: Shading across rod thickness
-      // Highlights the curved cylinder top, rich candy color in middle, ambient occlusion at bottom
-      final topColor = Color.lerp(p.color, Colors.white, 0.42)!
+      // 2. 3D Cylindrical Shading across rod thickness:
+      // Rounded highlight at top, vibrant candy core in middle, soft shadow at bottom
+      final topColor = Color.lerp(p.color, Colors.white, 0.44)!
           .withValues(alpha: alpha);
-      final crestColor = Color.lerp(p.color, Colors.white, 0.78)!
+      final crestColor = Color.lerp(p.color, Colors.white, 0.76)!
           .withValues(alpha: alpha);
       final bodyColor = p.color.withValues(alpha: alpha);
-      final bottomColor = Color.lerp(p.color, Colors.black, 0.22)!
+      final bottomColor = Color.lerp(p.color, Colors.black, 0.20)!
           .withValues(alpha: alpha);
 
       cylinderPaint.shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [topColor, crestColor, bodyColor, bottomColor],
-        stops: const [0.0, 0.22, 0.58, 1.0],
+        stops: const [0.0, 0.20, 0.55, 1.0],
       ).createShader(rodRect);
 
       canvas.drawRRect(
@@ -202,19 +202,19 @@ class SprinkleRainPainter extends CustomPainter {
         cylinderPaint,
       );
 
-      // 3. Specular gloss highlight stripe along the length of the cylinder
+      // 3. Specular gloss highlight stripe along the cylinder surface
       final highlightRect = Rect.fromLTWH(
-        -halfLength * 0.75,
-        -halfThick * 0.65,
-        visibleLength * 0.75,
-        p.thickness * 0.25,
+        -halfLength * 0.70,
+        -halfThick * 0.60,
+        visibleLength * 0.70,
+        p.thickness * 0.22,
       );
       highlightPaint.color =
-          Colors.white.withValues(alpha: 0.55 * alpha * cosPitch);
+          Colors.white.withValues(alpha: 0.50 * alpha * cosPitch);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           highlightRect,
-          Radius.circular(p.thickness * 0.15),
+          Radius.circular(p.thickness * 0.12),
         ),
         highlightPaint,
       );

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../models/design_concept.dart';
 import '../../theme/app_theme.dart';
 import 'widgets/app_home_placeholder.dart';
+import 'widgets/donut_3d_mesh_renderer.dart';
 import 'widgets/donut_3d_painter.dart';
 import 'widgets/donut_portal_clipper.dart';
-import 'widgets/realistic_donut_widget.dart';
 import 'widgets/sprinkle_rain_painter.dart';
 
 /// Complete interactive mobile splash animation screen for Design 01 — Donut Spin.
@@ -43,16 +43,6 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
 
     // Autoplay automatically when screen opens
     _controller.forward();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Precache the realistic 3D donut asset for zero-latency presentation
-    precacheImage(
-      const AssetImage('assets/images/donut/donut_3d_photoreal.png'),
-      context,
-    );
   }
 
   @override
@@ -198,8 +188,6 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     double shadowScale = 1.0;
     double pitch = 0.0;
     double yaw = 0.0;
-    double lightSweep = 0.0;
-    double holeGlow = 0.0;
     double cameraZoom = 1.0;
     double donutOpacity = 1.0;
 
@@ -255,9 +243,6 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
 
       // Realistic pitch tilt showcasing the top glaze & 3D thickness
       pitch = 0.38 * math.sin(p * math.pi); // Max ~22 degrees tilt
-
-      // Specular light sweep across the glaze
-      lightSweep = -1.0 + 2.0 * p;
       shadowOpacity = 0.30;
       shadowScale = 1.0;
     }
@@ -269,26 +254,24 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       pitch = 0.0;
       donutY = 0.0;
 
-      // Hole deepening & soft glow cue (1350 to 1500 ms)
+      // Hole deepening & alignment cue (1350 to 1500 ms)
       if (t < 0.556) {
-        final p = ((t - 0.500) / 0.056).clamp(0.0, 1.0);
-        holeGlow = Curves.easeInOut.transform(p);
         shadowOpacity = 0.30;
       } else {
-        holeGlow = 1.0;
-
-        // Camera plunge & zoom through hole (1500 to 1950 ms)
+        // Camera plunges forward through the center opening (1500 to 1950 ms)
         final p = ((t - 0.556) / (0.722 - 0.556)).clamp(0.0, 1.0);
-        final plungeCurve = Curves.easeInCubic.transform(p);
+        final plungeCurve = Curves.easeInOutCubic.transform(p);
 
-        // Donut scales up dramatically as camera moves into the hole
-        cameraZoom = 1.0 + 17.0 * plungeCurve;
+        // Donut scales up moderately (from 1.0 to 3.2x), moving outer body outside the viewport
+        cameraZoom = 1.0 + 2.2 * plungeCurve;
 
-        // Fade out donut as camera moves past the outer rim
-        if (p > 0.80) {
-          donutOpacity = (1.0 - (p - 0.80) / 0.20).clamp(0.0, 1.0);
+        // Fade out donut smoothly as camera passes through the plane of the opening
+        if (p < 0.35) {
+          donutOpacity = 1.0;
+        } else {
+          donutOpacity = (1.0 - (p - 0.35) / 0.55).clamp(0.0, 1.0);
         }
-        shadowOpacity = (0.30 * (1.0 - p)).clamp(0.0, 1.0);
+        shadowOpacity = (0.30 * (1.0 - plungeCurve)).clamp(0.0, 1.0);
       }
     }
     // -------------------------------------------------------------------------
@@ -297,7 +280,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     else {
       donutOpacity = 0.0;
       shadowOpacity = 0.0;
-      cameraZoom = 18.0;
+      cameraZoom = 3.2;
     }
 
     // Sprinkle rain progress (active across Phase B and part of C)
@@ -306,19 +289,33 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       sprinkleProgress = ((t - 0.241) / (0.650 - 0.241)).clamp(0.0, 1.0);
     }
 
-    // Portal opening radius tied precisely to donut inner hole
+    // Screen diagonal for complete corner-to-corner portal expansion
+    final screenDiagonal =
+        math.sqrt(screenWidth * screenWidth + screenHeight * screenHeight);
+
+    // Continuous, smooth portal expansion originating from the actual donut hole
     double portalRadius = 0.0;
-    if (t >= 0.556) {
-      portalRadius = innerHoleRadius * cameraZoom;
-      if (t >= 0.722) {
-        portalRadius = math.max(screenWidth, screenHeight) * 1.5; // Fully expands
+    if (t >= 0.500) {
+      if (t < 0.556) {
+        portalRadius = innerHoleRadius;
+      } else if (t < 0.722) {
+        final p = ((t - 0.556) / (0.722 - 0.556)).clamp(0.0, 1.0);
+        final baseHole = innerHoleRadius * cameraZoom;
+        portalRadius = baseHole + (screenDiagonal - baseHole) * math.pow(p, 2.0);
+      } else {
+        portalRadius = screenDiagonal * 1.2; // Fully expanded
       }
     }
 
     // Placeholder enter progress
     double placeholderEnter = 0.0;
-    if (t >= 0.722) {
-      placeholderEnter = ((t - 0.722) / (1.000 - 0.722)).clamp(0.0, 1.0);
+    if (t >= 0.500) {
+      if (t < 0.722) {
+        final p = ((t - 0.500) / (0.722 - 0.500)).clamp(0.0, 1.0);
+        placeholderEnter = 0.40 + 0.60 * Curves.easeInOut.transform(p);
+      } else {
+        placeholderEnter = 1.0;
+      }
     }
 
     return Stack(
@@ -354,7 +351,8 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
           ),
 
         // 4. Portal Revealed Layer: Minimal App Home Placeholder
-        if (t >= 0.556)
+        // Smoothly revealed through the donut's actual center opening
+        if (t >= 0.500)
           ClipPath(
             clipper: DonutHolePortalClipper(
               center: centerOffset,
@@ -365,20 +363,21 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
             ),
           ),
 
-        // 5. Portal Inner Rim Glow Band (as camera moves through the hole)
-        if (portalRadius > 0.0 && portalRadius < screenWidth * 1.8)
+        // 5. Portal Inner Rim Glow Band (subtle soft illumination while passing through)
+        if (portalRadius > 0.0 &&
+            portalRadius < screenDiagonal * 0.85 &&
+            donutOpacity > 0.15)
           Positioned.fill(
             child: CustomPaint(
               painter: PortalRimPainter(
                 center: centerOffset,
                 radius: portalRadius,
-                opacity: (1.0 - (portalRadius / (screenWidth * 1.8)))
-                    .clamp(0.0, 1.0),
+                opacity: donutOpacity * 0.60,
               ),
             ),
           ),
 
-        // 6. Photorealistic 3D Donut Layer (Drop, Gooey Bounce, 3D Spin, Zoom Plunge)
+        // 6. Genuine 3D Donut Mesh Layer (Drop, Gooey Bounce, True 3D Spin, Zoom Plunge)
         if (donutOpacity > 0.0)
           Positioned.fill(
             child: Opacity(
@@ -390,17 +389,15 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
                     angle: donutTiltZ,
                     child: Transform.scale(
                       scale: cameraZoom,
-                      child: Transform.scale(
-                        scaleX: squashX,
-                        scaleY: squashY,
-                        child: RealisticDonutWidget(
+                      child: CustomPaint(
+                        size: Size(donutDiameter, donutDiameter),
+                        painter: Donut3DMeshRenderer(
                           pitch: pitch,
                           yaw: yaw,
-                          diameter: donutDiameter,
                           ringRadius: ringRadius,
                           tubeRadius: tubeRadius,
-                          holeGlow: holeGlow,
-                          lightSweep: lightSweep,
+                          squashX: squashX,
+                          squashY: squashY,
                         ),
                       ),
                     ),
