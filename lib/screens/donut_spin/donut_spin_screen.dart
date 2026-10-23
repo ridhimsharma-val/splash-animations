@@ -2,18 +2,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/design_concept.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/category_badge.dart';
 import 'widgets/app_home_placeholder.dart';
 import 'widgets/donut_3d_painter.dart';
 import 'widgets/donut_portal_clipper.dart';
+import 'widgets/realistic_donut_widget.dart';
 import 'widgets/sprinkle_rain_painter.dart';
 
-/// Complete interactive splash animation screen for Design 01 — Donut Spin.
-/// Orchestrates all 4 motion phases:
-/// - Phase A (0–650 ms): Donut drop, gravity acceleration, and gooey elastic bounce.
-/// - Phase B (650–1,350 ms): 3D perspective spin and falling sprinkle rain.
-/// - Phase C (1,350–1,950 ms): Donut-hole portal opening and camera plunge through the hole.
-/// - Phase D (1,950–2,700 ms): Smooth reveal of the minimal App Home Placeholder.
+/// Complete interactive mobile splash animation screen for Design 01 — Donut Spin.
+/// Mobile-first edge-to-edge presentation orchestrating 4 motion phases:
+/// - Phase A (0–650 ms): Donut drop from completely off-screen, gravity acceleration, gooey squash/stretch bounce.
+/// - Phase B (650–1,350 ms): 3D perspective spin, thickness tilt, light sweep, falling sprinkle rain.
+/// - Phase C (1,350–1,950 ms): Hole glow, camera plunge expanding through the donut hole.
+/// - Phase D (1,950–2,700 ms): Seamless reveal of the minimal App Home Placeholder.
 class DonutSpinScreen extends StatefulWidget {
   final DesignConcept? concept;
 
@@ -27,10 +27,10 @@ class DonutSpinScreen extends StatefulWidget {
 }
 
 class _DonutSpinScreenState extends State<DonutSpinScreen>
-    with SingleTickerProviderRefObserver, SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  // Total duration: 2,700 ms
+  // Total duration: 2,700 ms (~2.7 seconds)
   static const int _totalDurationMs = 2700;
 
   @override
@@ -41,8 +41,18 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       duration: const Duration(milliseconds: _totalDurationMs),
     );
 
-    // Auto-play automatically on screen entry
+    // Autoplay automatically when screen opens
     _controller.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Precache the realistic 3D donut asset for zero-latency presentation
+    precacheImage(
+      const AssetImage('assets/images/donut/donut_3d_photoreal.png'),
+      context,
+    );
   }
 
   @override
@@ -59,108 +69,97 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6E9), // Warm vanilla cream
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14),
-          child: Center(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () => Navigator.of(context).maybePop(),
-              child: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFEADBCE)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+      body: Center(
+        child: ConstrainedBox(
+          // Mobile container: full edge-to-edge on phones, capped at 460 on wide web view
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  // 1. Full-screen active splash animation canvas
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, _) {
+                      return _buildSplashCanvas(context, constraints);
+                    },
+                  ),
+
+                  // 2. Unobtrusive floating controls outside focal composition
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Back Navigation Button
+                            _buildCircleButton(
+                              icon: Icons.arrow_back_ios_new_rounded,
+                              tooltip: 'Back to Gallery',
+                              onPressed: () => Navigator.of(context).maybePop(),
+                            ),
+
+                            // Replay Splash Animation Button
+                            _buildCircleButton(
+                              icon: Icons.replay_rounded,
+                              tooltip: 'Replay Splash Animation',
+                              onPressed: _replay,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 15,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF7DDEB),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Design 01',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFD81B60),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const CategoryBadge(
-                category: DesignCategory.splashScreen,
-                isCompact: true,
+      ),
+    );
+  }
+
+  Widget _buildCircleButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onPressed,
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.88),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFFEADBCE).withValues(alpha: 0.8),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: IconButton(
-              tooltip: 'Replay Splash Animation',
-              icon: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFEADBCE)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.replay_rounded,
-                  size: 18,
-                  color: Color(0xFFD81B60),
-                ),
-              ),
-              onPressed: _replay,
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 460),
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) {
-                return _buildSplashComposition(context);
-              },
+          child: Center(
+            child: Icon(
+              icon,
+              size: 16,
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -168,15 +167,28 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     );
   }
 
-  Widget _buildSplashComposition(BuildContext context) {
-    final double t = _controller.value; // master 0.0 to 1.0
+  Widget _buildSplashCanvas(BuildContext context, BoxConstraints constraints) {
+    final double t = _controller.value; // master progress 0.0 to 1.0
 
-    // Normalized timeline phase thresholds:
-    // 0 ms -> t = 0.0
-    // 650 ms -> t = 0.241 (Phase A: Drop & Bounce)
-    // 1350 ms -> t = 0.500 (Phase B: 3D Spin & Sprinkle Rain)
-    // 1950 ms -> t = 0.722 (Phase C: Portal & Camera Plunge)
-    // 2700 ms -> t = 1.000 (Phase D: App Home Placeholder)
+    final screenWidth = constraints.maxWidth;
+    final screenHeight = constraints.maxHeight;
+    final centerOffset = Offset(screenWidth / 2, screenHeight / 2);
+
+    // Dynamic Sizing:
+    // Donut diameter occupies 62% of available screen width (strictly within 55%-70% requirement).
+    // Proportions: major ring radius R = 0.67 * donutRadius, minor tube radius r = 0.33 * donutRadius.
+    // Total outer radius = R + r = 1.0 * donutRadius = donutDiameter / 2.
+    // Hole radius = R - r = 0.34 * donutRadius (~21% of screen width, clearly visible).
+    final donutDiameter = screenWidth * 0.62;
+    final donutRadius = donutDiameter / 2.0;
+    final ringRadius = donutRadius * 0.67;
+    final tubeRadius = donutRadius * 0.33;
+    final innerHoleRadius = ringRadius - tubeRadius;
+
+    // Guaranteed off-screen start position:
+    // Screen top edge is at -(screenHeight / 2). Bottom of donut is at startDropY + donutRadius.
+    // Making startDropY = -(screenHeight / 2 + donutRadius + 60) guarantees it is 100% off-screen.
+    final startDropY = -(screenHeight / 2.0 + donutRadius + 60.0);
 
     double donutY = 0.0;
     double donutTiltZ = 0.0;
@@ -192,35 +204,35 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     double donutOpacity = 1.0;
 
     // -------------------------------------------------------------------------
-    // Phase A: The Drop & Gooey Bounce (0 ms to 650 ms, t in [0.0, 0.241])
+    // Phase A: The Drop & Gooey Elastic Bounce (0 ms to 650 ms, t in [0.0, 0.241])
     // -------------------------------------------------------------------------
     if (t < 0.241) {
       if (t < 0.148) {
-        // Falling with gravity acceleration
+        // Falling with gravity acceleration from completely off-screen
         final p = (t / 0.148).clamp(0.0, 1.0);
         final dropCurve = Curves.easeInQuad.transform(p);
-        donutY = -420.0 + 420.0 * dropCurve;
-        donutTiltZ = (-14.0 * (1.0 - dropCurve)) * (math.pi / 180.0);
+        donutY = startDropY * (1.0 - dropCurve);
+        donutTiltZ = (-12.0 * (1.0 - dropCurve)) * (math.pi / 180.0);
         shadowOpacity = 0.02 + 0.28 * dropCurve;
-        shadowScale = 0.30 + 0.70 * dropCurve;
+        shadowScale = 0.25 + 0.75 * dropCurve;
       } else if (t < 0.178) {
-        // Impact & squash deformation
+        // Impact & gooey squash deformation
         final p = ((t - 0.148) / 0.030).clamp(0.0, 1.0);
         final c = math.sin(p * math.pi / 2);
         squashY = 1.0 - 0.28 * c;
         squashX = 1.0 + 0.26 * c;
-        donutY = 18.0 * c;
+        donutY = 16.0 * c;
         shadowOpacity = 0.30 + 0.12 * c;
-        shadowScale = 1.0 + 0.25 * c;
+        shadowScale = 1.0 + 0.24 * c;
       } else if (t < 0.207) {
         // Elastic rebound & vertical stretch
         final p = ((t - 0.178) / 0.029).clamp(0.0, 1.0);
         final c = math.sin(p * math.pi / 2);
         squashY = 0.72 + (1.14 - 0.72) * c;
         squashX = 1.26 - (1.26 - 0.90) * c;
-        donutY = 18.0 - 50.0 * c; // Rebounds upward to -32 px
+        donutY = 16.0 - 48.0 * c; // Rebounds upward to -32 px
         shadowOpacity = 0.42 - 0.20 * c;
-        shadowScale = 1.25 - 0.40 * c;
+        shadowScale = 1.24 - 0.40 * c;
       } else {
         // Dampened gooey settle
         final p = ((t - 0.207) / 0.034).clamp(0.0, 1.0);
@@ -228,11 +240,11 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
         squashX = 0.90 + (1.0 - 0.90) * Curves.easeOutBack.transform(p);
         donutY = -32.0 * (1.0 - Curves.easeOutQuad.transform(p));
         shadowOpacity = 0.22 + 0.08 * p;
-        shadowScale = 0.85 + 0.15 * p;
+        shadowScale = 0.84 + 0.16 * p;
       }
     }
     // -------------------------------------------------------------------------
-    // Phase B: 3D Spin & Sprinkle Rain (650 ms to 1350 ms, t in [0.241, 0.500])
+    // Phase B: 3D Spin & Sprinkle Rain (650 ms to 1,350 ms, t in [0.241, 0.500])
     // -------------------------------------------------------------------------
     else if (t < 0.500) {
       final p = ((t - 0.241) / (0.500 - 0.241)).clamp(0.0, 1.0);
@@ -246,9 +258,11 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
 
       // Specular light sweep across the glaze
       lightSweep = -1.0 + 2.0 * p;
+      shadowOpacity = 0.30;
+      shadowScale = 1.0;
     }
     // -------------------------------------------------------------------------
-    // Phase C: Donut-Hole Portal & Camera Move (1350 ms to 1950 ms, t in [0.500, 0.722])
+    // Phase C: Donut-Hole Portal & Camera Move (1,350 ms to 1,950 ms, t in [0.500, 0.722])
     // -------------------------------------------------------------------------
     else if (t < 0.722) {
       yaw = 0.0;
@@ -259,6 +273,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       if (t < 0.556) {
         final p = ((t - 0.500) / 0.056).clamp(0.0, 1.0);
         holeGlow = Curves.easeInOut.transform(p);
+        shadowOpacity = 0.30;
       } else {
         holeGlow = 1.0;
 
@@ -277,7 +292,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       }
     }
     // -------------------------------------------------------------------------
-    // Phase D: App Home Placeholder (1950 ms to 2700 ms, t in [0.722, 1.000])
+    // Phase D: App Home Placeholder (1,950 ms to 2,700 ms, t in [0.722, 1.000])
     // -------------------------------------------------------------------------
     else {
       donutOpacity = 0.0;
@@ -291,14 +306,12 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       sprinkleProgress = ((t - 0.241) / (0.650 - 0.241)).clamp(0.0, 1.0);
     }
 
-    // Portal opening radius (tied precisely to donut hole radius)
-    // Base inner hole radius is 34 px
-    const double baseInnerHoleRadius = 34.0;
+    // Portal opening radius tied precisely to donut inner hole
     double portalRadius = 0.0;
     if (t >= 0.556) {
-      portalRadius = baseInnerHoleRadius * cameraZoom;
+      portalRadius = innerHoleRadius * cameraZoom;
       if (t >= 0.722) {
-        portalRadius = 1200.0; // Fully expanded
+        portalRadius = math.max(screenWidth, screenHeight) * 1.5; // Fully expands
       }
     }
 
@@ -308,86 +321,106 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       placeholderEnter = ((t - 0.722) / (1.000 - 0.722)).clamp(0.0, 1.0);
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final centerOffset = Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // 1. Background layer: Warm vanilla cream
+        Container(color: const Color(0xFFFFF6E9)),
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            // 1. Background layer: Vanilla cream
-            Container(color: const Color(0xFFFFF6E9)),
-
-            // 2. Sprinkle Rain Layer (celebratory cascade during spin)
-            if (sprinkleProgress > 0.0 && sprinkleProgress < 1.0)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: SprinkleRainPainter(progress: sprinkleProgress),
-                ),
+        // 2. Ground Contact Shadow (anchored to ground plane, responsive to drop & squashing)
+        if (shadowOpacity > 0.0)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: DonutGroundShadowPainter(
+                center: centerOffset,
+                ringRadius: ringRadius,
+                tubeRadius: tubeRadius,
+                squashX: squashX,
+                shadowOpacity: shadowOpacity,
+                shadowScale: shadowScale,
               ),
+            ),
+          ),
 
-            // 3. Portal Revealed Layer: App Home Placeholder
-            // Clipped to the expanding inner hole circle
-            if (t >= 0.556)
-              ClipPath(
-                clipper: DonutHolePortalClipper(
-                  center: centerOffset,
-                  radius: portalRadius,
-                ),
-                child: AppHomePlaceholder(
-                  enterProgress: placeholderEnter,
-                ),
+        // 3. Background Candy Sprinkles Layer (tumbles behind the 3D donut)
+        if (sprinkleProgress > 0.0 && sprinkleProgress < 1.0)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: SprinkleRainPainter(
+                progress: sprinkleProgress,
+                depthFilter: SprinkleDepthFilter.backgroundOnly,
               ),
+            ),
+          ),
 
-            // 4. Portal Inner Rim Glow Band (as camera moves through)
-            if (portalRadius > 0.0 && portalRadius < 800.0)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: PortalRimPainter(
-                    center: centerOffset,
-                    radius: portalRadius,
-                    opacity: (1.0 - (portalRadius / 800.0)).clamp(0.0, 1.0),
-                  ),
-                ),
+        // 4. Portal Revealed Layer: Minimal App Home Placeholder
+        if (t >= 0.556)
+          ClipPath(
+            clipper: DonutHolePortalClipper(
+              center: centerOffset,
+              radius: portalRadius,
+            ),
+            child: AppHomePlaceholder(
+              enterProgress: placeholderEnter,
+            ),
+          ),
+
+        // 5. Portal Inner Rim Glow Band (as camera moves through the hole)
+        if (portalRadius > 0.0 && portalRadius < screenWidth * 1.8)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: PortalRimPainter(
+                center: centerOffset,
+                radius: portalRadius,
+                opacity: (1.0 - (portalRadius / (screenWidth * 1.8)))
+                    .clamp(0.0, 1.0),
               ),
+            ),
+          ),
 
-            // 5. 3D Donut Layer (Drop, Gooey Bounce, 3D Spin, Zoom Plunge)
-            if (donutOpacity > 0.0)
-              Positioned.fill(
-                child: Opacity(
-                  opacity: donutOpacity,
-                  child: Center(
-                    child: Transform.translate(
-                      offset: Offset(0.0, donutY),
-                      child: Transform.rotate(
-                        angle: donutTiltZ,
-                        child: Transform.scale(
-                          scale: cameraZoom,
-                          child: CustomPaint(
-                            size: const Size(220, 220),
-                            painter: Donut3DPainter(
-                              pitch: pitch,
-                              yaw: yaw,
-                              squashX: squashX,
-                              squashY: squashY,
-                              shadowOpacity: shadowOpacity,
-                              shadowScale: shadowScale,
-                              holeGlow: holeGlow,
-                              lightSweep: lightSweep,
-                            ),
-                          ),
+        // 6. Photorealistic 3D Donut Layer (Drop, Gooey Bounce, 3D Spin, Zoom Plunge)
+        if (donutOpacity > 0.0)
+          Positioned.fill(
+            child: Opacity(
+              opacity: donutOpacity,
+              child: Center(
+                child: Transform.translate(
+                  offset: Offset(0.0, donutY),
+                  child: Transform.rotate(
+                    angle: donutTiltZ,
+                    child: Transform.scale(
+                      scale: cameraZoom,
+                      child: Transform.scale(
+                        scaleX: squashX,
+                        scaleY: squashY,
+                        child: RealisticDonutWidget(
+                          pitch: pitch,
+                          yaw: yaw,
+                          diameter: donutDiameter,
+                          ringRadius: ringRadius,
+                          tubeRadius: tubeRadius,
+                          holeGlow: holeGlow,
+                          lightSweep: lightSweep,
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-          ],
-        );
-      },
+            ),
+          ),
+
+        // 7. Foreground Candy Sprinkles Layer (tumbles in front of the donut glaze)
+        if (sprinkleProgress > 0.0 && sprinkleProgress < 1.0)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: SprinkleRainPainter(
+                progress: sprinkleProgress,
+                depthFilter: SprinkleDepthFilter.foregroundOnly,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
-
-/// Helper mixin to prevent SingleTickerProviderStateMixin vs WidgetsBinding observer collision
-mixin SingleTickerProviderRefObserver on State<DonutSpinScreen> {}

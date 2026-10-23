@@ -15,8 +15,8 @@ class _Sprinkle3D {
     required this.color,
   });
 
-  static const double defaultLength = 13.0;
-  static const double defaultThickness = 4.2;
+  static const double baseLength = 13.0;
+  static const double baseThickness = 4.2;
 }
 
 /// A quad facet on the 3D parametric torus surface.
@@ -43,16 +43,16 @@ class _TorusQuad {
 class Donut3DPainter extends CustomPainter {
   final double pitch; // X-axis tilt in radians
   final double yaw; // Y-axis spin in radians
+  final double ringRadius; // Major radius R
+  final double tubeRadius; // Minor radius r
   final double squashX; // Horizontal squash/stretch factor
   final double squashY; // Vertical squash/stretch factor
   final double shadowOpacity; // Shadow intensity
   final double shadowScale; // Shadow radius factor
   final double holeGlow; // Soft cream-pink glow emerging from the hole (0.0 to 1.0)
   final double lightSweep; // Specular gloss sweep position (-1.0 to 1.0)
+  final bool drawShadow; // Whether to paint shadow internally or via ground shadow layer
 
-  // Torus dimensions (in logical pixels)
-  static const double ringRadius = 66.0; // Major radius R
-  static const double tubeRadius = 32.0; // Minor radius r
   static const double focalLength = 520.0; // Camera distance for perspective
 
   // Palette
@@ -99,20 +99,25 @@ class Donut3DPainter extends CustomPainter {
   const Donut3DPainter({
     required this.pitch,
     required this.yaw,
+    this.ringRadius = 80.0,
+    this.tubeRadius = 40.0,
     this.squashX = 1.0,
     this.squashY = 1.0,
     this.shadowOpacity = 0.30,
     this.shadowScale = 1.0,
     this.holeGlow = 0.0,
     this.lightSweep = 0.0,
+    this.drawShadow = true,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
 
-    // 1. Draw contact ground shadow beneath the donut
-    _drawContactShadow(canvas, center);
+    // 1. Draw contact ground shadow beneath the donut (if enabled)
+    if (drawShadow) {
+      _drawContactShadow(canvas, center);
+    }
 
     // 2. Prepare 3D rotation trigonometric values
     final cosPitch = math.cos(pitch);
@@ -136,13 +141,11 @@ class Donut3DPainter extends CustomPainter {
 
     // Helper: compute 3D point on parametric torus and project to 2D
     math.Point<double> projectPoint(double x, double y, double z) {
-      // 3D Rotation (Yaw around Y, then Pitch around X)
       final rx = x * cosYaw + z * sinYaw;
       final tempZ = -x * sinYaw + z * cosYaw;
       final ry = y * cosPitch - tempZ * sinPitch;
       final rz = y * sinPitch + tempZ * cosPitch;
 
-      // Perspective projection
       final pers = focalLength / (focalLength + rz);
       final px = rx * pers * squashX;
       final py = ry * pers * squashY;
@@ -163,11 +166,6 @@ class Donut3DPainter extends CustomPainter {
         final v1 = (j / nv) * 2 * math.pi;
         final v2 = ((j + 1) / nv) * 2 * math.pi;
 
-        // Quad corners in local 3D coordinates
-        // Torus equation:
-        // x = (R + r * cos(v)) * cos(u)
-        // y = (R + r * cos(v)) * sin(u)
-        // z = r * sin(v)
         final cosV1 = math.cos(v1);
         final sinV1 = math.sin(v1);
         final cosV2 = math.cos(v2);
@@ -189,7 +187,6 @@ class Donut3DPainter extends CustomPainter {
         final p4y = (ringRadius + tubeRadius * cosV2) * math.sin(u1);
         final p4z = tubeRadius * sinV2;
 
-        // Midpoint of quad for normal and depth
         final midU = (u1 + u2) / 2;
         final midV = (v1 + v2) / 2;
         final cosMidV = math.cos(midV);
@@ -203,18 +200,16 @@ class Donut3DPainter extends CustomPainter {
 
         final avgZ = getRotatedZ(midX, midY, midZ);
 
-        // Surface normal in 3D: N = (cos(v)*cos(u), cos(v)*sin(u), sin(v))
         final nx = cosMidV * cosMidU;
         final ny = cosMidV * sinMidU;
         final nz = sinMidV;
 
-        // Rotate normal
         final rnx = nx * cosYaw + nz * sinYaw;
         final tempNz = -nx * sinYaw + nz * cosYaw;
         final rny = ny * cosPitch - tempNz * sinPitch;
         final rnz = ny * sinPitch + tempNz * cosPitch;
 
-        // Back-face culling (facing away from camera along Z)
+        // Back-face culling
         if (rnz < -0.15) continue;
 
         // Diffuse lighting
@@ -228,7 +223,6 @@ class Donut3DPainter extends CustomPainter {
 
         Color quadColor;
         if (isGlaze) {
-          // Specular highlight on glaze
           final hx = normLx;
           final hy = normLy;
           final hz = normLz + 1.0;
@@ -247,14 +241,12 @@ class Donut3DPainter extends CustomPainter {
 
           quadColor = Color.from(alpha: 1.0, red: finalR, green: finalG, blue: finalB);
         } else {
-          // Baked dough with warm gradient
           final r = (doughBase.r * light).clamp(0.0, 1.0);
           final g = (doughBase.g * light).clamp(0.0, 1.0);
           final b = (doughBase.b * light).clamp(0.0, 1.0);
           quadColor = Color.from(alpha: 1.0, red: r, green: g, blue: b);
         }
 
-        // Project the 4 quad corners
         final pt1 = projectPoint(p1x, p1y, p1z);
         final pt2 = projectPoint(p2x, p2y, p2z);
         final pt3 = projectPoint(p3x, p3y, p3z);
@@ -274,10 +266,9 @@ class Donut3DPainter extends CustomPainter {
       }
     }
 
-    // Sort quads from back to front (Painter's algorithm)
+    // Sort quads from back to front
     quads.sort((a, b) => a.avgZ.compareTo(b.avgZ));
 
-    // Paint the sorted torus mesh
     final quadPaint = Paint()..style = PaintingStyle.fill;
     for (final q in quads) {
       final path = Path()
@@ -290,11 +281,11 @@ class Donut3DPainter extends CustomPainter {
       canvas.drawPath(path, quadPaint);
     }
 
-    // 3. Render 3D Sprinkles on the upper glaze with true perspective
+    // 3. Render 3D Sprinkles on the upper glaze with proportional sizing
     _drawSprinkles(canvas, center, cosYaw, sinYaw, cosPitch, sinPitch, normLx,
         normLy, normLz);
 
-    // 4. Soft pink-cream glow inside the inner hole (Phase C transition cue)
+    // 4. Soft pink-cream glow inside the inner hole
     if (holeGlow > 0.0) {
       _drawHoleGlow(canvas, center);
     }
@@ -303,9 +294,9 @@ class Donut3DPainter extends CustomPainter {
   void _drawContactShadow(Canvas canvas, Offset center) {
     if (shadowOpacity <= 0.0) return;
 
-    final shadowY = center.dy + 82.0 * squashY;
-    final shadowWidth = 190.0 * shadowScale * squashX;
-    final shadowHeight = 28.0 * shadowScale;
+    final shadowY = center.dy + (ringRadius + tubeRadius) * 0.85 * squashY;
+    final shadowWidth = (ringRadius + tubeRadius) * 2.0 * shadowScale * squashX;
+    final shadowHeight = (tubeRadius * 0.9) * shadowScale;
 
     final shadowRect = Rect.fromCenter(
       center: Offset(center.dx, shadowY),
@@ -337,8 +328,8 @@ class Donut3DPainter extends CustomPainter {
     double normLy,
     double normLz,
   ) {
-    // Depth-sort visible sprinkles
     final visibleSprinkles = <Map<String, dynamic>>[];
+    final sprinkleScale = (ringRadius + tubeRadius) / 100.0;
 
     for (final s in _sprinkles) {
       final cosV = math.cos(s.v);
@@ -346,17 +337,14 @@ class Donut3DPainter extends CustomPainter {
       final cosU = math.cos(s.u);
       final sinU = math.sin(s.u);
 
-      // Local 3D position on torus
       final x = (ringRadius + (tubeRadius + 1.2) * cosV) * cosU;
       final y = (ringRadius + (tubeRadius + 1.2) * cosV) * sinU;
       final z = (tubeRadius + 1.2) * sinV;
 
-      // Surface normal
       final nx = cosV * cosU;
       final ny = cosV * sinU;
       final nz = sinV;
 
-      // Rotate position and normal
       final rx = x * cosYaw + z * sinYaw;
       final tempZ = -x * sinYaw + z * cosYaw;
       final ry = y * cosPitch - tempZ * sinPitch;
@@ -367,15 +355,12 @@ class Donut3DPainter extends CustomPainter {
       final rny = ny * cosPitch - tempNz * sinPitch;
       final rnz = ny * sinPitch + tempNz * cosPitch;
 
-      // Only draw if facing front
       if (rnz <= 0.08) continue;
 
-      // Perspective projection
       final pers = focalLength / (focalLength + rz);
       final screenX = center.dx + rx * pers * squashX;
       final screenY = center.dy + ry * pers * squashY;
 
-      // Lighting factor
       final dot = math.max(0.0, rnx * normLx + rny * normLy + rnz * normLz);
       final light = 0.55 + 0.45 * dot;
 
@@ -384,14 +369,13 @@ class Donut3DPainter extends CustomPainter {
         'y': screenY,
         'z': rz,
         'color': s.color,
-        'length': _Sprinkle3D.defaultLength * pers,
-        'thickness': _Sprinkle3D.defaultThickness * pers,
+        'length': _Sprinkle3D.baseLength * sprinkleScale * pers,
+        'thickness': _Sprinkle3D.baseThickness * sprinkleScale * pers,
         'angle': s.rotation + yaw * 0.3,
         'light': light,
       });
     }
 
-    // Sort back-to-front
     visibleSprinkles.sort((a, b) => (a['z'] as double).compareTo(b['z'] as double));
 
     final sprinklePaint = Paint()..style = PaintingStyle.fill;
@@ -419,7 +403,6 @@ class Donut3DPainter extends CustomPainter {
       canvas.translate(x, y);
       canvas.rotate(angle);
 
-      // Micro contact shadow under sprinkle
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
@@ -432,7 +415,6 @@ class Donut3DPainter extends CustomPainter {
         shadowPaint,
       );
 
-      // Sprinkle pill capsule
       sprinklePaint.color = litColor;
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -471,11 +453,71 @@ class Donut3DPainter extends CustomPainter {
   bool shouldRepaint(covariant Donut3DPainter oldDelegate) {
     return oldDelegate.pitch != pitch ||
         oldDelegate.yaw != yaw ||
+        oldDelegate.ringRadius != ringRadius ||
+        oldDelegate.tubeRadius != tubeRadius ||
         oldDelegate.squashX != squashX ||
         oldDelegate.squashY != squashY ||
         oldDelegate.shadowOpacity != shadowOpacity ||
         oldDelegate.shadowScale != shadowScale ||
         oldDelegate.holeGlow != holeGlow ||
-        oldDelegate.lightSweep != lightSweep;
+        oldDelegate.lightSweep != lightSweep ||
+        oldDelegate.drawShadow != drawShadow;
+  }
+}
+
+/// Standalone ground contact shadow that stays fixed on the floor plane
+/// while the 3D donut drops, squashes, stretches, and settles above it.
+class DonutGroundShadowPainter extends CustomPainter {
+  final Offset center;
+  final double ringRadius;
+  final double tubeRadius;
+  final double squashX;
+  final double shadowOpacity;
+  final double shadowScale;
+
+  const DonutGroundShadowPainter({
+    required this.center,
+    required this.ringRadius,
+    required this.tubeRadius,
+    this.squashX = 1.0,
+    this.shadowOpacity = 0.30,
+    this.shadowScale = 1.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (shadowOpacity <= 0.0) return;
+
+    final shadowY = center.dy + (ringRadius + tubeRadius) * 0.85;
+    final shadowWidth = (ringRadius + tubeRadius) * 2.0 * shadowScale * squashX;
+    final shadowHeight = (tubeRadius * 0.9) * shadowScale;
+
+    final shadowRect = Rect.fromCenter(
+      center: Offset(center.dx, shadowY),
+      width: shadowWidth,
+      height: shadowHeight,
+    );
+
+    final shadowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF5A3825).withValues(alpha: shadowOpacity * 0.7),
+          const Color(0xFF5A3825).withValues(alpha: shadowOpacity * 0.35),
+          const Color(0xFF5A3825).withValues(alpha: 0.0),
+        ],
+        stops: const [0.0, 0.55, 1.0],
+      ).createShader(shadowRect);
+
+    canvas.drawOval(shadowRect, shadowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant DonutGroundShadowPainter oldDelegate) {
+    return oldDelegate.shadowOpacity != shadowOpacity ||
+        oldDelegate.shadowScale != shadowScale ||
+        oldDelegate.squashX != squashX ||
+        oldDelegate.ringRadius != ringRadius ||
+        oldDelegate.tubeRadius != tubeRadius ||
+        oldDelegate.center != center;
   }
 }

@@ -58,11 +58,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1100));
       await tester.pumpAndSettle();
 
-      // Verify the final screen is AppHomePlaceholder
+      // Verify the final screen is AppHomePlaceholder with only emblem and text
       expect(find.byType(AppHomePlaceholder), findsOneWidget);
       expect(find.text('App Home Placeholder'), findsOneWidget);
       expect(find.text('Your app starts here'), findsOneWidget);
-      expect(find.text('Splash Transition Complete'), findsOneWidget);
 
       // Test Replay button
       final replayButton = find.byTooltip('Replay Splash Animation');
@@ -135,6 +134,46 @@ void main() {
 
       expect(find.text('Explore Designs'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'DonutSpinScreen adapts cleanly to portrait 393x852 and 320x568 without overflow',
+        (WidgetTester tester) async {
+      for (final size in [const Size(393, 852), const Size(320, 568)]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: DonutSpinScreen(),
+          ),
+        );
+
+        // Check frame at 0ms (off-screen drop start)
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+
+        // Check Phase A (impact / gooey bounce)
+        await tester.pump(const Duration(milliseconds: 450));
+        expect(tester.takeException(), isNull);
+
+        // Check Phase B (3D spin)
+        await tester.pump(const Duration(milliseconds: 550));
+        expect(tester.takeException(), isNull);
+
+        // Check Phase C (Portal plunge)
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(tester.takeException(), isNull);
+
+        // Check Phase D (Completion)
+        await tester.pump(const Duration(milliseconds: 1100));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text('App Home Placeholder'), findsOneWidget);
+        expect(find.text('Your app starts here'), findsOneWidget);
+      }
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
   });
 }
