@@ -4,6 +4,7 @@ import 'package:onboarding_splash/main.dart';
 import 'package:onboarding_splash/models/design_concept.dart';
 import 'package:onboarding_splash/screens/donut_spin/donut_spin_screen.dart';
 import 'package:onboarding_splash/screens/donut_spin/widgets/app_home_placeholder.dart';
+import 'package:onboarding_splash/screens/donut_spin/widgets/donut_frame_animator.dart';
 import 'package:onboarding_splash/screens/gallery_screen.dart';
 
 void main() {
@@ -174,6 +175,47 @@ void main() {
       }
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
+    });
+
+    testWidgets('Calibrated 4-phase sequence and hole geometry ratios are validated',
+        (WidgetTester tester) async {
+      // Analytical hole calibration ratio
+      expect(DonutCalibration.holeRadiusRatio, closeTo(58.0 / 320.0, 0.0001));
+      expect(DonutCalibration.outerRadiusRatio, closeTo(144.0 / 320.0, 0.0001));
+
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: DonutSpinScreen(),
+        ),
+      );
+
+      // Frame 0: Plain golden dough drop
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byType(DonutFrameAnimator), findsOneWidget);
+      final plainAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(plainAnimator.frameIndex, 0);
+
+      // Phase 2: Diagonal 360° spin with progressive glaze
+      await tester.pump(const Duration(milliseconds: 800)); // Total 1000ms (mid Phase 2)
+      final midSpinAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(midSpinAnimator.frameIndex, greaterThan(0));
+      expect(midSpinAnimator.frameIndex, lessThanOrEqualTo(47));
+
+      // Phase 3: Glazed donut with surface sprinkles pop-in
+      await tester.pump(const Duration(milliseconds: 800)); // Total 1800ms (Phase 3)
+      final glazedAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(glazedAnimator.frameIndex, 47);
+      expect(glazedAnimator.sprinklePopProgress, greaterThan(0.0));
+
+      // Phase 4: Hole portal expansion to AppHomePlaceholder
+      await tester.pump(const Duration(milliseconds: 1200)); // Total 3000ms (Completion)
+      await tester.pumpAndSettle();
+      expect(find.byType(AppHomePlaceholder), findsOneWidget);
     });
   });
 }
