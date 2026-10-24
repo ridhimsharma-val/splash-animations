@@ -172,8 +172,12 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     final donutRadius = donutDiameter / 2.0;
 
     // Calibrated inner hole radius:
-    // Empirically measured from 320x320 analytical 3D raymarch frame (radius = 58 px, ratio = 0.18125)
+    // Empirically measured from 320x320 reference-guided 3D frames (radius = 46.5 px, ratio = 0.1453125)
     final innerHoleRadius = donutDiameter * DonutCalibration.holeRadiusRatio;
+    final holeCenter = Offset(
+      centerOffset.dx + donutDiameter * DonutCalibration.holeCenterOffsetX,
+      centerOffset.dy,
+    );
 
     // Guaranteed off-screen start position
     final startDropY = -(screenHeight / 2.0 + donutRadius + 60.0);
@@ -187,7 +191,6 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     double cameraZoom = 1.0;
     double donutOpacity = 1.0;
     int frameIndex = 0;
-    double sprinklePopProgress = 0.0;
     double sprinkleRainProgress = 0.0;
 
     // -------------------------------------------------------------------------
@@ -250,22 +253,19 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
       shadowScale = 1.0;
     }
     // -------------------------------------------------------------------------
-    // Phase 3: Glazed Donut at Rest, Sprinkles Pop-in & Celebration Cascade (1,550–2,150 ms, t in [0.517, 0.717])
+    // Phase 3: Glazed Donut at Rest, Subtle Camera Approach & Sprinkle Rain (1,550–2,150 ms, t in [0.517, 0.717])
     // -------------------------------------------------------------------------
     else if (t < 0.717) {
       final p = ((t - 0.517) / (0.717 - 0.517)).clamp(0.0, 1.0);
 
-      frameIndex = 47; // Fully glazed strawberry pink donut facing camera
+      frameIndex = 47; // Fully glazed strawberry pink donut with 3D candy sprinkles
       donutY = 0.0;
-
-      // Surface candy sprinkles dynamically pop on the glaze with micro-bounces
-      sprinklePopProgress = Curves.easeOutQuad.transform(p);
 
       // Background and foreground falling sprinkle rain cascade
       sprinkleRainProgress = p;
 
-      // Subtle camera zoom (1.0x to 1.14x) for dramatic focal lock
-      cameraZoom = 1.0 + 0.14 * Curves.easeInOut.transform(p);
+      // Subtle camera zoom (1.0x to 1.12x) for focal lock
+      cameraZoom = 1.0 + 0.12 * Curves.easeInOut.transform(p);
       shadowOpacity = 0.30;
       shadowScale = 1.0;
     }
@@ -278,10 +278,9 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
 
       frameIndex = 47;
       donutY = 0.0;
-      sprinklePopProgress = 1.0;
 
-      // Camera zooms forward through the opening (from 1.14x to 4.2x)
-      cameraZoom = 1.14 + 3.06 * plungeCurve;
+      // Camera zooms forward through the opening (from 1.12x to 4.2x)
+      cameraZoom = 1.12 + 3.08 * plungeCurve;
 
       // Fade out donut smoothly as the camera passes through the opening plane
       if (p < 0.35) {
@@ -349,7 +348,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
         if (t >= 0.717)
           ClipPath(
             clipper: DonutHolePortalClipper(
-              center: centerOffset,
+              center: holeCenter,
               radius: portalRadius,
             ),
             child: AppHomePlaceholder(
@@ -364,9 +363,9 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
           Positioned.fill(
             child: CustomPaint(
               painter: PortalRimPainter(
-                center: centerOffset,
+                center: holeCenter,
                 radius: portalRadius,
-                opacity: donutOpacity * 0.60,
+                opacity: donutOpacity * 0.50,
               ),
             ),
           ),
@@ -389,7 +388,6 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
                         diameter: donutDiameter,
                         squashX: squashX,
                         squashY: squashY,
-                        sprinklePopProgress: sprinklePopProgress,
                       ),
                     ),
                   ),

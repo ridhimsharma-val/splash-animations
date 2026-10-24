@@ -179,9 +179,9 @@ void main() {
 
     testWidgets('Calibrated 4-phase sequence and hole geometry ratios are validated',
         (WidgetTester tester) async {
-      // Analytical hole calibration ratio
-      expect(DonutCalibration.holeRadiusRatio, closeTo(58.0 / 320.0, 0.0001));
-      expect(DonutCalibration.outerRadiusRatio, closeTo(144.0 / 320.0, 0.0001));
+      // Analytical hole calibration ratio matching reference 3D frames
+      expect(DonutCalibration.holeRadiusRatio, closeTo(46.5 / 320.0, 0.0001));
+      expect(DonutCalibration.outerRadiusRatio, closeTo(141.0 / 320.0, 0.0001));
 
       tester.view.physicalSize = const Size(393, 852);
       tester.view.devicePixelRatio = 1.0;
@@ -206,11 +206,10 @@ void main() {
       expect(midSpinAnimator.frameIndex, greaterThan(0));
       expect(midSpinAnimator.frameIndex, lessThanOrEqualTo(47));
 
-      // Phase 3: Glazed donut with surface sprinkles pop-in
+      // Phase 3: Glazed donut with 3D sprinkles attached
       await tester.pump(const Duration(milliseconds: 800)); // Total 1800ms (Phase 3)
       final glazedAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
       expect(glazedAnimator.frameIndex, 47);
-      expect(glazedAnimator.sprinklePopProgress, greaterThan(0.0));
 
       // Phase 4: Hole portal expansion to AppHomePlaceholder
       await tester.pump(const Duration(milliseconds: 1200)); // Total 3000ms (Completion)
