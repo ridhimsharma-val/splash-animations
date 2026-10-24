@@ -180,8 +180,8 @@ void main() {
     testWidgets('Calibrated 4-phase sequence and hole geometry ratios are validated',
         (WidgetTester tester) async {
       // Analytical hole calibration ratio matching reference 3D frames
-      expect(DonutCalibration.holeRadiusRatio, closeTo(46.5 / 320.0, 0.0001));
-      expect(DonutCalibration.outerRadiusRatio, closeTo(141.0 / 320.0, 0.0001));
+      expect(DonutCalibration.holeRadiusRatio, closeTo(44.5 / 320.0, 0.0001));
+      expect(DonutCalibration.outerRadiusRatio, closeTo(140.0 / 320.0, 0.0001));
 
       tester.view.physicalSize = const Size(393, 852);
       tester.view.devicePixelRatio = 1.0;

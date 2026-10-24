@@ -4,24 +4,24 @@ import 'package:flutter/services.dart';
 
 /// Analytical calibration constants empirically measured from the reference-guided 3D frames:
 /// - Frame size: 320x320 px
-/// - Hole center: (158.0, 160.0) — center opening
-/// - Hole radius: 46.5 px — 100% transparent opening
-/// - Outer rim radius: 141.0 px — golden dough & pink glaze
+/// - Hole center: (161.0, 160.0) — optical center opening
+/// - Hole radius: 44.5 px — 100% transparent opening (diameter 89 px)
+/// - Outer rim radius: 140.0 px — golden dough & pink glaze
 class DonutCalibration {
   static const double frameSize = 320.0;
-  static const double holeRadius = 46.5;
-  static const double outerRadius = 141.0;
+  static const double holeRadius = 44.5;
+  static const double outerRadius = 140.0;
 
   /// Inner hole radius relative to the rendered donut diameter.
-  /// 46.5 / 320.0 = 0.1453125.
+  /// 44.5 / 320.0 = 0.1390625.
   static const double holeRadiusRatio = holeRadius / frameSize;
 
   /// Outer radius relative to the rendered donut diameter.
-  /// 141.0 / 320.0 = 0.440625.
+  /// 140.0 / 320.0 = 0.4375.
   static const double outerRadiusRatio = outerRadius / frameSize;
 
-  /// Center X offset relative to frame center: (158.0 - 160.0) / 320.0 = -0.00625.
-  static const double holeCenterOffsetX = (158.0 - 160.0) / frameSize;
+  /// Center X offset relative to frame center: (161.0 - 160.0) / 320.0 = 0.003125.
+  static const double holeCenterOffsetX = (161.0 - 160.0) / frameSize;
 }
 
 /// Static manager that caches the decoded 48-frame atlas in GPU memory
