@@ -59,10 +59,15 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1100));
       await tester.pumpAndSettle();
 
-      // Verify the final screen is AppHomePlaceholder with only emblem and text
+      // Verify the final screen is AppHomePlaceholder with 'Donut Spin' text
       expect(find.byType(AppHomePlaceholder), findsOneWidget);
-      expect(find.text('App Home Placeholder'), findsOneWidget);
-      expect(find.text('Your app starts here'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppHomePlaceholder),
+          matching: find.text('Donut Spin'),
+        ),
+        findsOneWidget,
+      );
 
       // Test Replay button
       final replayButton = find.byTooltip('Replay Splash Animation');
@@ -73,7 +78,13 @@ void main() {
       // Fast forward again to completion
       await tester.pump(const Duration(milliseconds: 2700));
       await tester.pumpAndSettle();
-      expect(find.text('App Home Placeholder'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppHomePlaceholder),
+          matching: find.text('Donut Spin'),
+        ),
+        findsOneWidget,
+      );
 
       // Test Back navigation
       final backButton = find.byIcon(Icons.arrow_back_ios_new_rounded);
@@ -170,8 +181,13 @@ void main() {
         await tester.pump(const Duration(milliseconds: 1100));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
-        expect(find.text('App Home Placeholder'), findsOneWidget);
-        expect(find.text('Your app starts here'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(AppHomePlaceholder),
+            matching: find.text('Donut Spin'),
+          ),
+          findsOneWidget,
+        );
       }
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
@@ -179,9 +195,9 @@ void main() {
 
     testWidgets('Calibrated 4-phase sequence and hole geometry ratios are validated',
         (WidgetTester tester) async {
-      // Analytical hole calibration ratio matching reference 3D frames
-      expect(DonutCalibration.holeRadiusRatio, closeTo(44.5 / 320.0, 0.0001));
-      expect(DonutCalibration.outerRadiusRatio, closeTo(140.0 / 320.0, 0.0001));
+      // Analytical hole calibration ratio matching 2D plain donut asset
+      expect(DonutCalibration.holeRadiusRatio, closeTo(90.2 / 1024.0, 0.0001));
+      expect(DonutCalibration.outerRadiusRatio, closeTo(481.0 / 1024.0, 0.0001));
 
       tester.view.physicalSize = const Size(393, 852);
       tester.view.devicePixelRatio = 1.0;
@@ -215,6 +231,54 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1200)); // Total 3000ms (Completion)
       await tester.pumpAndSettle();
       expect(find.byType(AppHomePlaceholder), findsOneWidget);
+    });
+
+    testWidgets('Complete 6-stage sequence: drop, splash, icing, sprinkles, hold, portal plunge, AppHomePlaceholder',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: DonutSpinScreen(),
+        ),
+      );
+
+      // 1. Plain dough drop at 200ms
+      await tester.pump(const Duration(milliseconds: 200));
+      var animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(animator.icingOpacity, 0.0);
+      expect(animator.sprinklesProgress, 0.0);
+
+      // 2. Icing splash & glaze reveal at 1000ms
+      await tester.pump(const Duration(milliseconds: 800));
+      animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(animator.icingOpacity, greaterThan(0.0));
+
+      // 3. Sprinkle cascade at 1800ms
+      await tester.pump(const Duration(milliseconds: 800));
+      animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(animator.icingOpacity, 1.0);
+      expect(animator.sprinklesProgress, greaterThan(0.0));
+
+      // 4. Sprinkles settled at 2200ms
+      await tester.pump(const Duration(milliseconds: 400));
+      animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
+      expect(animator.sprinklesProgress, 1.0);
+
+      // 5. Completion & interactive AppHomePlaceholder at 3000ms
+      await tester.pump(const Duration(milliseconds: 800));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppHomePlaceholder), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppHomePlaceholder),
+          matching: find.text('Donut Spin'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

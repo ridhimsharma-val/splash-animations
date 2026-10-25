@@ -52,31 +52,31 @@ class _Design01Mockup extends StatelessWidget {
           Stack(
             alignment: Alignment.center,
             children: [
-              // Dough base
+              // Dough base matching Blender baked crust
               Container(
                 width: 68,
                 height: 68,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFE8AB6B),
+                  color: const Color(0xFFD48232),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF5A3825).withValues(alpha: 0.18),
+                      color: const Color(0xFF5A3825).withValues(alpha: 0.22),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
               ),
-              // Strawberry Glaze
+              // Strawberry Glaze matching Blender bright strawberry pink
               Container(
                 width: 60,
                 height: 60,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [Color(0xFFFFF0F5), Color(0xFFF58FB3)],
-                    stops: [0.4, 1.0],
+                    colors: [Color(0xFFFF70A0), Color(0xFFFA3E7B)],
+                    stops: [0.35, 1.0],
                   ),
                 ),
               ),
@@ -89,7 +89,7 @@ class _Design01Mockup extends StatelessWidget {
                   color: Color(0xFFFFF6E9),
                 ),
               ),
-              // Sprinkles on mini donut
+              // Sprinkles on mini donut matching Blender candy palette
               Positioned(
                 top: 14,
                 left: 20,
@@ -97,7 +97,7 @@ class _Design01Mockup extends StatelessWidget {
                   width: 7,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF70E0D0),
+                    color: const Color(0xFF0077FF), // Electric Blue
                     borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
@@ -109,7 +109,7 @@ class _Design01Mockup extends StatelessWidget {
                   width: 7,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD166),
+                    color: const Color(0xFFFFD600), // Lemon Yellow
                     borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
@@ -121,7 +121,7 @@ class _Design01Mockup extends StatelessWidget {
                   width: 3,
                   height: 7,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDED2F9),
+                    color: const Color(0xFF00E676), // Lime Spring Green
                     borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
@@ -133,7 +133,7 @@ class _Design01Mockup extends StatelessWidget {
                   width: 7,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF8B8B),
+                    color: const Color(0xFFFF1744), // Candy Red
                     borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
