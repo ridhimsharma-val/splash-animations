@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import '../../models/design_concept.dart';
 import '../../theme/app_theme.dart';
 import 'widgets/app_home_placeholder.dart';
@@ -17,10 +19,7 @@ import 'widgets/sprinkle_rain_painter.dart';
 class DonutSpinScreen extends StatefulWidget {
   final DesignConcept? concept;
 
-  const DonutSpinScreen({
-    super.key,
-    this.concept,
-  });
+  const DonutSpinScreen({super.key, this.concept});
 
   @override
   State<DonutSpinScreen> createState() => _DonutSpinScreenState();
@@ -156,11 +155,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
             ],
           ),
           child: Center(
-            child: Icon(
-              icon,
-              size: 16,
-              color: AppColors.textPrimary,
-            ),
+            child: Icon(icon, size: 16, color: AppColors.textPrimary),
           ),
         ),
       ),
@@ -173,8 +168,9 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
     final screenWidth = constraints.maxWidth;
     final screenHeight = constraints.maxHeight;
     final centerOffset = Offset(screenWidth / 2, screenHeight / 2);
-    final screenDiagonal =
-        math.sqrt(screenWidth * screenWidth + screenHeight * screenHeight);
+    final screenDiagonal = math.sqrt(
+      screenWidth * screenWidth + screenHeight * screenHeight,
+    );
 
     // Responsive Donut Diameter: 62% of available screen width
     final donutDiameter = screenWidth * 0.62;
@@ -293,8 +289,10 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
           splashOpacity = Curves.easeOut.transform(splashProg / 0.20);
         } else {
           splashOpacity =
-              (1.0 - Curves.easeIn.transform((splashProg - 0.20) / 0.80))
-                  .clamp(0.0, 1.0);
+              (1.0 - Curves.easeIn.transform((splashProg - 0.20) / 0.80)).clamp(
+                0.0,
+                1.0,
+              );
         }
       } else {
         splashOpacity = 0.0;
@@ -463,9 +461,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
         // - Final destination (t >= 0.980): unclipped and full screen for complete interactivity
         if (t >= 0.980)
           Positioned.fill(
-            child: AppHomePlaceholder(
-              enterProgress: placeholderEnter,
-            ),
+            child: AppHomePlaceholder(enterProgress: placeholderEnter),
           )
         else if (portalRadius > 0.0 && placeholderOpacity > 0.0)
           Positioned.fill(
@@ -479,9 +475,7 @@ class _DonutSpinScreenState extends State<DonutSpinScreen>
                 child: Transform.scale(
                   scale: placeholderScale,
                   alignment: Alignment.center,
-                  child: AppHomePlaceholder(
-                    enterProgress: placeholderEnter,
-                  ),
+                  child: AppHomePlaceholder(enterProgress: placeholderEnter),
                 ),
               ),
             ),

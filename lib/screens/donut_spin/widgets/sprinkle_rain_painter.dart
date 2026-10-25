@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import 'donut_frame_animator.dart';
 
 /// Exact bright confectionery candy palette matching Blender Cycles & visual specification.
@@ -54,43 +56,129 @@ final List<LandedSprinkleData> kLandedSprinkles = _buildLandedSprinkles();
 
 List<LandedSprinkleData> _buildLandedSprinkles() {
   const angles = [
-    0.18, 0.44, 0.70, 0.96, 1.22, 1.48, 1.74, 2.00,
-    2.26, 2.52, 2.78, 3.04, 3.30, 3.56, 3.82, 4.08,
-    4.34, 4.60, 4.86, 5.12, 5.38, 5.64, 5.90, 6.16,
+    0.18,
+    0.44,
+    0.70,
+    0.96,
+    1.22,
+    1.48,
+    1.74,
+    2.00,
+    2.26,
+    2.52,
+    2.78,
+    3.04,
+    3.30,
+    3.56,
+    3.82,
+    4.08,
+    4.34,
+    4.60,
+    4.86,
+    5.12,
+    5.38,
+    5.64,
+    5.90,
+    6.16,
   ];
 
   // Strictly on the top crown of the icing (r in [0.22, 0.35]).
   // Well away from center hole (r > 0.088) and outer dough rim (r < 0.470).
   const radii = [
-    0.23, 0.33, 0.26, 0.31, 0.22, 0.34, 0.25, 0.32,
-    0.24, 0.35, 0.27, 0.30, 0.23, 0.34, 0.25, 0.31,
-    0.24, 0.35, 0.26, 0.33, 0.22, 0.32, 0.27, 0.29,
+    0.23,
+    0.33,
+    0.26,
+    0.31,
+    0.22,
+    0.34,
+    0.25,
+    0.32,
+    0.24,
+    0.35,
+    0.27,
+    0.30,
+    0.23,
+    0.34,
+    0.25,
+    0.31,
+    0.24,
+    0.35,
+    0.26,
+    0.33,
+    0.22,
+    0.32,
+    0.27,
+    0.29,
   ];
 
   const tilts = [
-    0.35, 1.20, 2.10, 0.85, 1.75, 2.60, 0.40, 1.45,
-    2.30, 0.95, 1.80, 2.70, 0.50, 1.60, 2.45, 0.75,
-    1.90, 2.85, 0.60, 1.50, 2.25, 0.80, 1.70, 2.55,
+    0.35,
+    1.20,
+    2.10,
+    0.85,
+    1.75,
+    2.60,
+    0.40,
+    1.45,
+    2.30,
+    0.95,
+    1.80,
+    2.70,
+    0.50,
+    1.60,
+    2.45,
+    0.75,
+    1.90,
+    2.85,
+    0.60,
+    1.50,
+    2.25,
+    0.80,
+    1.70,
+    2.55,
   ];
 
   // All 24 sprinkles land by progress 0.72, giving ample settling time
   const landings = [
-    0.10, 0.22, 0.16, 0.32, 0.25, 0.38, 0.12, 0.28,
-    0.44, 0.35, 0.20, 0.48, 0.30, 0.46, 0.40, 0.54,
-    0.58, 0.50, 0.64, 0.56, 0.68, 0.60, 0.72, 0.52,
+    0.10,
+    0.22,
+    0.16,
+    0.32,
+    0.25,
+    0.38,
+    0.12,
+    0.28,
+    0.44,
+    0.35,
+    0.20,
+    0.48,
+    0.30,
+    0.46,
+    0.40,
+    0.54,
+    0.58,
+    0.50,
+    0.64,
+    0.56,
+    0.68,
+    0.60,
+    0.72,
+    0.52,
   ];
 
   final list = <LandedSprinkleData>[];
   for (int i = 0; i < 24; i++) {
-    list.add(LandedSprinkleData(
-      radiusRatio: radii[i],
-      angle: angles[i],
-      tilt: tilts[i],
-      lengthRatio: 0.054 + (i % 3) * 0.003,
-      thicknessRatio: 0.016 + (i % 2) * 0.002,
-      color: _candyColors[i % _candyColors.length],
-      landProgress: landings[i],
-    ));
+    list.add(
+      LandedSprinkleData(
+        radiusRatio: radii[i],
+        angle: angles[i],
+        tilt: tilts[i],
+        lengthRatio: 0.054 + (i % 3) * 0.003,
+        thicknessRatio: 0.016 + (i % 2) * 0.002,
+        color: _candyColors[i % _candyColors.length],
+        landProgress: landings[i],
+      ),
+    );
   }
   return list;
 }
@@ -134,18 +222,20 @@ List<_StraySprinkle> _buildStraySprinkles() {
     final side = (i % 2 == 0) ? -1.0 : 1.0;
     final relX = side * (140.0 + random.nextDouble() * 80.0);
 
-    list.add(_StraySprinkle(
-      relX: relX,
-      speed: 1.40 + random.nextDouble() * 0.40, // Fast fall, exits early
-      delay: 0.02 + random.nextDouble() * 0.16,
-      length: 12.0 + random.nextDouble() * 3.0,
-      thickness: 3.6 + random.nextDouble() * 0.6,
-      tilt: random.nextDouble() * math.pi,
-      rotationSpeed: (random.nextDouble() - 0.5) * 4.0,
-      driftAmp: 4.0 + random.nextDouble() * 8.0,
-      driftFreq: 2.0 + random.nextDouble() * 2.0,
-      color: _candyColors[i % _candyColors.length],
-    ));
+    list.add(
+      _StraySprinkle(
+        relX: relX,
+        speed: 1.40 + random.nextDouble() * 0.40, // Fast fall, exits early
+        delay: 0.02 + random.nextDouble() * 0.16,
+        length: 12.0 + random.nextDouble() * 3.0,
+        thickness: 3.6 + random.nextDouble() * 0.6,
+        tilt: random.nextDouble() * math.pi,
+        rotationSpeed: (random.nextDouble() - 0.5) * 4.0,
+        driftAmp: 4.0 + random.nextDouble() * 8.0,
+        driftFreq: 2.0 + random.nextDouble() * 2.0,
+        color: _candyColors[i % _candyColors.length],
+      ),
+    );
   }
   return list;
 }
@@ -233,10 +323,7 @@ class LandedSprinklesPainter extends CustomPainter {
         stops: const [0.0, 0.22, 0.60, 1.0],
       ).createShader(rodRect);
 
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rodRect, radius),
-        cylinderPaint,
-      );
+      canvas.drawRRect(RRect.fromRectAndRadius(rodRect, radius), cylinderPaint);
 
       // 3. Specular gloss highlight stripe along upper cylinder edge
       final highlightRect = Rect.fromLTWH(
@@ -294,10 +381,12 @@ class SprinkleRainPainter extends CustomPainter {
         continue;
       }
 
-      final targetX = donutCenter.dx +
+      final targetX =
+          donutCenter.dx +
           donutDiameter * DonutCalibration.holeCenterOffsetX +
           donutDiameter * s.radiusRatio * math.cos(s.angle);
-      final targetY = donutCenter.dy +
+      final targetY =
+          donutCenter.dy +
           donutDiameter * DonutCalibration.holeCenterOffsetY +
           donutDiameter * s.radiusRatio * math.sin(s.angle);
 
@@ -327,13 +416,22 @@ class SprinkleRainPainter extends CustomPainter {
         height: thickness,
       );
 
-      final topColor = Color.lerp(s.color, Colors.white, 0.50)!
-          .withValues(alpha: alpha);
-      final crestColor = Color.lerp(s.color, Colors.white, 0.78)!
-          .withValues(alpha: alpha);
+      final topColor = Color.lerp(
+        s.color,
+        Colors.white,
+        0.50,
+      )!.withValues(alpha: alpha);
+      final crestColor = Color.lerp(
+        s.color,
+        Colors.white,
+        0.78,
+      )!.withValues(alpha: alpha);
       final bodyColor = s.color.withValues(alpha: alpha);
-      final bottomColor = Color.lerp(s.color, Colors.black, 0.25)!
-          .withValues(alpha: alpha);
+      final bottomColor = Color.lerp(
+        s.color,
+        Colors.black,
+        0.25,
+      )!.withValues(alpha: alpha);
 
       cylinderPaint.shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -342,10 +440,7 @@ class SprinkleRainPainter extends CustomPainter {
         stops: const [0.0, 0.22, 0.60, 1.0],
       ).createShader(rodRect);
 
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rodRect, radius),
-        cylinderPaint,
-      );
+      canvas.drawRRect(RRect.fromRectAndRadius(rodRect, radius), cylinderPaint);
 
       final highlightRect = Rect.fromLTWH(
         -halfLen * 0.72,
@@ -412,13 +507,22 @@ class SprinkleRainPainter extends CustomPainter {
         shadowPaint,
       );
 
-      final topColor = Color.lerp(s.color, Colors.white, 0.45)!
-          .withValues(alpha: alpha);
-      final crestColor = Color.lerp(s.color, Colors.white, 0.75)!
-          .withValues(alpha: alpha);
+      final topColor = Color.lerp(
+        s.color,
+        Colors.white,
+        0.45,
+      )!.withValues(alpha: alpha);
+      final crestColor = Color.lerp(
+        s.color,
+        Colors.white,
+        0.75,
+      )!.withValues(alpha: alpha);
       final bodyColor = s.color.withValues(alpha: alpha);
-      final bottomColor = Color.lerp(s.color, Colors.black, 0.22)!
-          .withValues(alpha: alpha);
+      final bottomColor = Color.lerp(
+        s.color,
+        Colors.black,
+        0.22,
+      )!.withValues(alpha: alpha);
 
       cylinderPaint.shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -427,10 +531,7 @@ class SprinkleRainPainter extends CustomPainter {
         stops: const [0.0, 0.20, 0.55, 1.0],
       ).createShader(rodRect);
 
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rodRect, radius),
-        cylinderPaint,
-      );
+      canvas.drawRRect(RRect.fromRectAndRadius(rodRect, radius), cylinderPaint);
 
       final highlightRect = Rect.fromLTWH(
         -halfLen * 0.70,

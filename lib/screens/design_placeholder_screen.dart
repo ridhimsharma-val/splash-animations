@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/design_concept.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_badge.dart';
@@ -9,10 +10,7 @@ import '../widgets/phone_preview_frame.dart';
 class DesignPlaceholderScreen extends StatelessWidget {
   final DesignConcept concept;
 
-  const DesignPlaceholderScreen({
-    super.key,
-    required this.concept,
-  });
+  const DesignPlaceholderScreen({super.key, required this.concept});
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +90,9 @@ class DesignPlaceholderScreen extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 18),
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.cardBackground,
                       borderRadius: BorderRadius.circular(20),
@@ -146,7 +146,9 @@ class DesignPlaceholderScreen extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.lavenderSurface,
                       borderRadius: BorderRadius.circular(16),
@@ -200,7 +202,9 @@ class DesignPlaceholderScreen extends StatelessWidget {
                       backgroundColor: AppColors.cardBackground,
                       side: const BorderSide(color: AppColors.border),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),

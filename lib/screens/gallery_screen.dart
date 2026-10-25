@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../models/design_concept.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coming_soon_dialog.dart';
 import 'donut_spin/donut_spin_screen.dart';
+import 'magic_fridge/magic_fridge_screen.dart';
 
 /// Main design-selection screen matching the Explore Designs mobile gallery style.
 class GalleryScreen extends StatefulWidget {
@@ -21,11 +23,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
     _isNavigating = true;
 
     if (concept.status == DesignStatus.activePlaceholder) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => DonutSpinScreen(concept: concept),
-        ),
-      );
+      if (concept.id == 'design_02') {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => MagicFridgeScreen(concept: concept),
+          ),
+        );
+      } else {
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => DonutSpinScreen(concept: concept)),
+        );
+      }
     } else {
       showComingSoonDialog(context, concept);
     }

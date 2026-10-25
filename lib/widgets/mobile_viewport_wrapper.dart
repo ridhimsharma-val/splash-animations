@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// Enforces a portrait mobile-app viewport at all times.
@@ -9,10 +11,7 @@ import '../theme/app_theme.dart';
 class MobileViewportWrapper extends StatelessWidget {
   final Widget child;
 
-  const MobileViewportWrapper({
-    super.key,
-    required this.child,
-  });
+  const MobileViewportWrapper({super.key, required this.child});
 
   static const double _targetMobileWidth = 412.0;
   static const double _targetMobileHeight = 884.0;
@@ -43,10 +42,7 @@ class MobileViewportWrapper extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(_phoneCornerRadius),
-                border: Border.all(
-                  color: const Color(0xFFDCC8F5),
-                  width: 3.0,
-                ),
+                border: Border.all(color: const Color(0xFFDCC8F5), width: 3.0),
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF292536).withValues(alpha: 0.14),

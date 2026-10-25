@@ -59,6 +59,7 @@ flutter:
 
   assets:
     - assets/images/donut/
+    - assets/images/magic_fridge/
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

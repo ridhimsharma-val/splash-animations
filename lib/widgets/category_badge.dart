@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/design_concept.dart';
 import '../theme/app_theme.dart';
 
@@ -16,9 +17,13 @@ class CategoryBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSplash = category == DesignCategory.splashScreen;
-    final bgColor = isSplash ? AppColors.lavenderSurface : AppColors.pinkSurface;
+    final bgColor = isSplash
+        ? AppColors.lavenderSurface
+        : AppColors.pinkSurface;
     final textColor = isSplash ? AppColors.deepLavender : AppColors.deepPink;
-    final borderColor = isSplash ? AppColors.primaryAccent : AppColors.secondaryAccent;
+    final borderColor = isSplash
+        ? AppColors.primaryAccent
+        : AppColors.secondaryAccent;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -58,10 +63,7 @@ class CategoryBadge extends StatelessWidget {
 class StatusBadge extends StatelessWidget {
   final DesignStatus status;
 
-  const StatusBadge({
-    super.key,
-    required this.status,
-  });
+  const StatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {

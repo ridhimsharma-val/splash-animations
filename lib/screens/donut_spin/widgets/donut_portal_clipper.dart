@@ -6,10 +6,7 @@ class DonutHolePortalClipper extends CustomClipper<Path> {
   final Offset center;
   final double radius;
 
-  const DonutHolePortalClipper({
-    required this.center,
-    required this.radius,
-  });
+  const DonutHolePortalClipper({required this.center, required this.radius});
 
   @override
   Path getClip(Size size) {

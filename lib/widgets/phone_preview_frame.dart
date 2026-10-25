@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// Reusable mobile phone mockup frame.
@@ -30,10 +31,7 @@ class PhonePreviewFrame extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: AppColors.border,
-          width: 2.0,
-        ),
+        border: Border.all(color: AppColors.border, width: 2.0),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF292536).withValues(alpha: 0.05),

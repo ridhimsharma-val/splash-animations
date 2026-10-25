@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/design_concept.dart';
 import '../theme/app_theme.dart';
 
@@ -6,10 +7,7 @@ import '../theme/app_theme.dart';
 class ConceptPreviewMockup extends StatelessWidget {
   final DesignConcept concept;
 
-  const ConceptPreviewMockup({
-    super.key,
-    required this.concept,
-  });
+  const ConceptPreviewMockup({super.key, required this.concept});
 
   @override
   Widget build(BuildContext context) {
@@ -179,78 +177,73 @@ class _Design01Mockup extends StatelessWidget {
   }
 }
 
-/// Design 02: Minimal Fade & Scale (Splash Screen)
+/// Design 02: Magic Fridge (Splash Screen)
 class _Design02Mockup extends StatelessWidget {
   const _Design02Mockup();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 24),
+      color: const Color(0xFFF4F7F4), // Fresh soft sage background
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border, width: 1.5),
-              color: AppColors.background,
-            ),
-            alignment: Alignment.center,
-            child: const Text(
-              'M',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
-                fontFamily: 'serif',
+          // Mini Fridge Icon
+          Image.asset(
+            'assets/images/magic_fridge/nutrifridge_app_icon.png',
+            width: 64,
+            height: 64,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFFA7D7A5),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF2E7D32), width: 1.5),
+              ),
+              child: const Icon(
+                Icons.kitchen_rounded,
+                color: Color(0xFF2E7D32),
+                size: 32,
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              'MINIMAL',
+              'MAGIC FRIDGE',
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2.0,
-                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.4,
+                color: Color(0xFF20542C),
               ),
             ),
           ),
           const SizedBox(height: 4),
-          const FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              'fade • scale',
-              style: TextStyle(
-                fontSize: 9,
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8EFE9),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFA7D7A5).withValues(alpha: 0.6),
+                width: 1.0,
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          // Soft thin loading line
-          Container(
-            width: 44,
-            height: 2,
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(2),
-            ),
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 22,
-              height: 2,
-              decoration: BoxDecoration(
-                color: AppColors.primaryAccent,
-                borderRadius: BorderRadius.circular(2),
+            child: const FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                '2.5D SPLASH',
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: Color(0xFF2E7D32),
+                ),
               ),
             ),
           ),
@@ -556,7 +549,11 @@ class _Design05Mockup extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.swipe_rounded, size: 11, color: AppColors.textSecondary),
+                Icon(
+                  Icons.swipe_rounded,
+                  size: 11,
+                  color: AppColors.textSecondary,
+                ),
                 SizedBox(width: 3),
                 Text(
                   'Swipe depth',
@@ -771,7 +768,11 @@ class _Design08Mockup extends StatelessWidget {
                 alignment: Alignment.center,
                 child: const Text(
                   '1',
-                  style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: AppColors.deepLavender),
+                  style: TextStyle(
+                    fontSize: 7,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.deepLavender,
+                  ),
                 ),
               ),
               const SizedBox(width: 5),

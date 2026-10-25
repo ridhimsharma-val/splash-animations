@@ -6,11 +6,14 @@ import 'package:onboarding_splash/screens/donut_spin/donut_spin_screen.dart';
 import 'package:onboarding_splash/screens/donut_spin/widgets/app_home_placeholder.dart';
 import 'package:onboarding_splash/screens/donut_spin/widgets/donut_frame_animator.dart';
 import 'package:onboarding_splash/screens/gallery_screen.dart';
+import 'package:onboarding_splash/screens/magic_fridge/magic_fridge_screen.dart';
+import 'package:onboarding_splash/screens/magic_fridge/widgets/nutrifridge_home_placeholder.dart';
 
 void main() {
   group('Onboarding & Splash Animation Lab — Design 01 Donut Spin Tests', () {
-    testWidgets('Gallery displays title and Design 01 Donut Spin card',
-        (WidgetTester tester) async {
+    testWidgets('Gallery displays title and Design 01 Donut Spin card', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1280, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -24,81 +27,86 @@ void main() {
       expect(find.text('Donut Spin'), findsOneWidget);
     });
 
-    testWidgets('Design 01 Donut Spin opens, auto-plays, and finishes on AppHomePlaceholder',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(412, 884);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets(
+      'Design 01 Donut Spin opens, auto-plays, and finishes on AppHomePlaceholder',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(412, 884);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const OnboardingSplashLabApp());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(const OnboardingSplashLabApp());
+        await tester.pumpAndSettle();
 
-      // Tap on Donut Spin card
-      final donutSpinCard = find.text('Donut Spin');
-      expect(donutSpinCard, findsOneWidget);
-      await tester.tap(donutSpinCard);
-      await tester.pump(); // Start page route transition
-      await tester.pump(const Duration(milliseconds: 350)); // Finish page route transition
+        // Tap on Donut Spin card
+        final donutSpinCard = find.text('Donut Spin');
+        expect(donutSpinCard, findsOneWidget);
+        await tester.tap(donutSpinCard);
+        await tester.pump(); // Start page route transition
+        await tester.pump(
+          const Duration(milliseconds: 350),
+        ); // Finish page route transition
 
-      // Verify we entered DonutSpinScreen
-      expect(find.byType(DonutSpinScreen), findsOneWidget);
+        // Verify we entered DonutSpinScreen
+        expect(find.byType(DonutSpinScreen), findsOneWidget);
 
-      // Phase A: Drop in progress
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(DonutSpinScreen), findsOneWidget);
+        // Phase A: Drop in progress
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(find.byType(DonutSpinScreen), findsOneWidget);
 
-      // Phase B: 3D Spin and sprinkle rain
-      await tester.pump(const Duration(milliseconds: 700));
-      expect(find.byType(DonutSpinScreen), findsOneWidget);
+        // Phase B: 3D Spin and sprinkle rain
+        await tester.pump(const Duration(milliseconds: 700));
+        expect(find.byType(DonutSpinScreen), findsOneWidget);
 
-      // Phase C: Portal expanding
-      await tester.pump(const Duration(milliseconds: 700));
+        // Phase C: Portal expanding
+        await tester.pump(const Duration(milliseconds: 700));
 
-      // Phase D: App Home Placeholder reveal and completion
-      await tester.pump(const Duration(milliseconds: 1100));
-      await tester.pumpAndSettle();
+        // Phase D: App Home Placeholder reveal and completion
+        await tester.pump(const Duration(milliseconds: 1100));
+        await tester.pumpAndSettle();
 
-      // Verify the final screen is AppHomePlaceholder with 'Donut Spin' text
-      expect(find.byType(AppHomePlaceholder), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(AppHomePlaceholder),
-          matching: find.text('Donut Spin'),
-        ),
-        findsOneWidget,
-      );
+        // Verify the final screen is AppHomePlaceholder with 'Donut Spin' text
+        expect(find.byType(AppHomePlaceholder), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(AppHomePlaceholder),
+            matching: find.text('Donut Spin'),
+          ),
+          findsOneWidget,
+        );
 
-      // Test Replay button
-      final replayButton = find.byTooltip('Replay Splash Animation');
-      expect(replayButton, findsOneWidget);
-      await tester.tap(replayButton);
-      await tester.pump(); // Restarts from beginning
+        // Test Replay button
+        final replayButton = find.byTooltip('Replay Splash Animation');
+        expect(replayButton, findsOneWidget);
+        await tester.tap(replayButton);
+        await tester.pump(); // Restarts from beginning
 
-      // Fast forward again to completion
-      await tester.pump(const Duration(milliseconds: 2700));
-      await tester.pumpAndSettle();
-      expect(
-        find.descendant(
-          of: find.byType(AppHomePlaceholder),
-          matching: find.text('Donut Spin'),
-        ),
-        findsOneWidget,
-      );
+        // Fast forward again to completion
+        await tester.pump(const Duration(milliseconds: 2700));
+        await tester.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byType(AppHomePlaceholder),
+            matching: find.text('Donut Spin'),
+          ),
+          findsOneWidget,
+        );
 
-      // Test Back navigation
-      final backButton = find.byIcon(Icons.arrow_back_ios_new_rounded);
-      expect(backButton, findsOneWidget);
-      await tester.tap(backButton);
-      await tester.pumpAndSettle();
+        // Test Back navigation
+        final backButton = find.byIcon(Icons.arrow_back_ios_new_rounded);
+        expect(backButton, findsOneWidget);
+        await tester.tap(backButton);
+        await tester.pumpAndSettle();
 
-      // Verify we returned to the gallery
-      expect(find.byType(GalleryScreen), findsOneWidget);
-      expect(find.byType(DonutSpinScreen), findsNothing);
-    });
+        // Verify we returned to the gallery
+        expect(find.byType(GalleryScreen), findsOneWidget);
+        expect(find.byType(DonutSpinScreen), findsNothing);
+      },
+    );
 
-    testWidgets('Tapping coming soon design still shows informative dialog',
-        (WidgetTester tester) async {
+    testWidgets('Tapping coming soon design still shows informative dialog', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1280, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -107,9 +115,9 @@ void main() {
       await tester.pumpWidget(const OnboardingSplashLabApp());
       await tester.pumpAndSettle();
 
-      final design02 = find.text('Minimal Fade & Scale');
-      expect(design02, findsOneWidget);
-      await tester.tap(design02);
+      final design03 = find.text('Cinematic Splash');
+      expect(design03, findsOneWidget);
+      await tester.tap(design03);
       await tester.pumpAndSettle();
 
       expect(find.byType(Dialog), findsOneWidget);
@@ -121,11 +129,12 @@ void main() {
       expect(find.byType(Dialog), findsNothing);
     });
 
-    testWidgets('All 8 registered designs are preserved',
-        (WidgetTester tester) async {
+    testWidgets('All 8 registered designs are preserved', (
+      WidgetTester tester,
+    ) async {
       expect(DesignConcept.collection.length, 8);
       expect(DesignConcept.collection[0].title, 'Donut Spin');
-      expect(DesignConcept.collection[1].title, 'Minimal Fade & Scale');
+      expect(DesignConcept.collection[1].title, 'Magic Fridge');
       expect(DesignConcept.collection[2].title, 'Cinematic Splash');
       expect(DesignConcept.collection[3].title, 'Illustrated Onboarding');
       expect(DesignConcept.collection[4].title, 'Parallax Onboarding');
@@ -134,8 +143,9 @@ void main() {
       expect(DesignConcept.collection[7].title, 'Staggered Content Reveal');
     });
 
-    testWidgets('Responsive mobile view renders cleanly without overflow',
-        (WidgetTester tester) async {
+    testWidgets('Responsive mobile view renders cleanly without overflow', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -149,38 +159,147 @@ void main() {
     });
 
     testWidgets(
-        'DonutSpinScreen adapts cleanly to portrait 393x852 and 320x568 without overflow',
-        (WidgetTester tester) async {
-      for (final size in [const Size(393, 852), const Size(320, 568)]) {
-        tester.view.physicalSize = size;
-        tester.view.devicePixelRatio = 1.0;
+      'DonutSpinScreen adapts cleanly to portrait 393x852 and 320x568 without overflow',
+      (WidgetTester tester) async {
+        for (final size in [const Size(393, 852), const Size(320, 568)]) {
+          tester.view.physicalSize = size;
+          tester.view.devicePixelRatio = 1.0;
 
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: DonutSpinScreen(),
-          ),
+          await tester.pumpWidget(const MaterialApp(home: DonutSpinScreen()));
+
+          // Check frame at 0ms (off-screen drop start)
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+
+          // Check Phase A (impact / gooey bounce)
+          await tester.pump(const Duration(milliseconds: 450));
+          expect(tester.takeException(), isNull);
+
+          // Check Phase B (3D spin)
+          await tester.pump(const Duration(milliseconds: 550));
+          expect(tester.takeException(), isNull);
+
+          // Check Phase C (Portal plunge)
+          await tester.pump(const Duration(milliseconds: 600));
+          expect(tester.takeException(), isNull);
+
+          // Check Phase D (Completion)
+          await tester.pump(const Duration(milliseconds: 1100));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          expect(
+            find.descendant(
+              of: find.byType(AppHomePlaceholder),
+              matching: find.text('Donut Spin'),
+            ),
+            findsOneWidget,
+          );
+        }
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      },
+    );
+
+    testWidgets(
+      'Calibrated 4-phase sequence and hole geometry ratios are validated',
+      (WidgetTester tester) async {
+        // Analytical hole calibration ratio matching 2D plain donut asset
+        expect(
+          DonutCalibration.holeRadiusRatio,
+          closeTo(90.2 / 1024.0, 0.0001),
+        );
+        expect(
+          DonutCalibration.outerRadiusRatio,
+          closeTo(481.0 / 1024.0, 0.0001),
         );
 
-        // Check frame at 0ms (off-screen drop start)
-        await tester.pump();
-        expect(tester.takeException(), isNull);
+        tester.view.physicalSize = const Size(393, 852);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-        // Check Phase A (impact / gooey bounce)
-        await tester.pump(const Duration(milliseconds: 450));
-        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const MaterialApp(home: DonutSpinScreen()));
 
-        // Check Phase B (3D spin)
-        await tester.pump(const Duration(milliseconds: 550));
-        expect(tester.takeException(), isNull);
+        // Frame 0: Plain golden dough drop
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(find.byType(DonutFrameAnimator), findsOneWidget);
+        final plainAnimator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(plainAnimator.frameIndex, 0);
 
-        // Check Phase C (Portal plunge)
-        await tester.pump(const Duration(milliseconds: 600));
-        expect(tester.takeException(), isNull);
+        // Phase 2: Diagonal 360° spin with progressive glaze
+        await tester.pump(
+          const Duration(milliseconds: 800),
+        ); // Total 1000ms (mid Phase 2)
+        final midSpinAnimator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(midSpinAnimator.frameIndex, greaterThan(0));
+        expect(midSpinAnimator.frameIndex, lessThanOrEqualTo(47));
 
-        // Check Phase D (Completion)
-        await tester.pump(const Duration(milliseconds: 1100));
+        // Phase 3: Glazed donut with 3D sprinkles attached
+        await tester.pump(
+          const Duration(milliseconds: 800),
+        ); // Total 1800ms (Phase 3)
+        final glazedAnimator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(glazedAnimator.frameIndex, 47);
+
+        // Phase 4: Hole portal expansion to AppHomePlaceholder
+        await tester.pump(
+          const Duration(milliseconds: 1200),
+        ); // Total 3000ms (Completion)
         await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
+        expect(find.byType(AppHomePlaceholder), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Complete 6-stage sequence: drop, splash, icing, sprinkles, hold, portal plunge, AppHomePlaceholder',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(393, 852);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(const MaterialApp(home: DonutSpinScreen()));
+
+        // 1. Plain dough drop at 200ms
+        await tester.pump(const Duration(milliseconds: 200));
+        var animator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(animator.icingOpacity, 0.0);
+        expect(animator.sprinklesProgress, 0.0);
+
+        // 2. Icing splash & glaze reveal at 1000ms
+        await tester.pump(const Duration(milliseconds: 800));
+        animator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(animator.icingOpacity, greaterThan(0.0));
+
+        // 3. Sprinkle cascade at 1800ms
+        await tester.pump(const Duration(milliseconds: 800));
+        animator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(animator.icingOpacity, 1.0);
+        expect(animator.sprinklesProgress, greaterThan(0.0));
+
+        // 4. Sprinkles settled at 2200ms
+        await tester.pump(const Duration(milliseconds: 400));
+        animator = tester.widget<DonutFrameAnimator>(
+          find.byType(DonutFrameAnimator),
+        );
+        expect(animator.sprinklesProgress, 1.0);
+
+        // 5. Completion & interactive AppHomePlaceholder at 3000ms
+        await tester.pump(const Duration(milliseconds: 800));
+        await tester.pumpAndSettle();
+        expect(find.byType(AppHomePlaceholder), findsOneWidget);
         expect(
           find.descendant(
             of: find.byType(AppHomePlaceholder),
@@ -188,97 +307,108 @@ void main() {
           ),
           findsOneWidget,
         );
-      }
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
+      },
+    );
+  });
 
-    testWidgets('Calibrated 4-phase sequence and hole geometry ratios are validated',
-        (WidgetTester tester) async {
-      // Analytical hole calibration ratio matching 2D plain donut asset
-      expect(DonutCalibration.holeRadiusRatio, closeTo(90.2 / 1024.0, 0.0001));
-      expect(DonutCalibration.outerRadiusRatio, closeTo(481.0 / 1024.0, 0.0001));
+  group('Onboarding & Splash Animation Lab — Design 02 Magic Fridge Tests', () {
+    testWidgets(
+      'Gallery displays Design 02 Magic Fridge card and can navigate to it',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1280, 1024);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-      tester.view.physicalSize = const Size(393, 852);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(const OnboardingSplashLabApp());
+        await tester.pumpAndSettle();
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: DonutSpinScreen(),
-        ),
-      );
+        expect(find.text('Design 02'), findsOneWidget);
+        expect(find.text('Magic Fridge'), findsOneWidget);
 
-      // Frame 0: Plain golden dough drop
-      await tester.pump(const Duration(milliseconds: 200));
-      expect(find.byType(DonutFrameAnimator), findsOneWidget);
-      final plainAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(plainAnimator.frameIndex, 0);
+        // Tap on Magic Fridge card
+        await tester.tap(find.text('Magic Fridge'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
 
-      // Phase 2: Diagonal 360° spin with progressive glaze
-      await tester.pump(const Duration(milliseconds: 800)); // Total 1000ms (mid Phase 2)
-      final midSpinAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(midSpinAnimator.frameIndex, greaterThan(0));
-      expect(midSpinAnimator.frameIndex, lessThanOrEqualTo(47));
+        expect(find.byType(MagicFridgeScreen), findsOneWidget);
 
-      // Phase 3: Glazed donut with 3D sprinkles attached
-      await tester.pump(const Duration(milliseconds: 800)); // Total 1800ms (Phase 3)
-      final glazedAnimator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(glazedAnimator.frameIndex, 47);
+        // Advance through animation scenes
+        // Scene 1: Arrival (800ms)
+        await tester.pump(const Duration(milliseconds: 800));
+        expect(find.byType(MagicFridgeScreen), findsOneWidget);
 
-      // Phase 4: Hole portal expansion to AppHomePlaceholder
-      await tester.pump(const Duration(milliseconds: 1200)); // Total 3000ms (Completion)
-      await tester.pumpAndSettle();
-      expect(find.byType(AppHomePlaceholder), findsOneWidget);
-    });
+        // Scene 2: Door opens & interior glow (900ms)
+        await tester.pump(const Duration(milliseconds: 900));
+        expect(find.byType(MagicFridgeScreen), findsOneWidget);
 
-    testWidgets('Complete 6-stage sequence: drop, splash, icing, sprinkles, hold, portal plunge, AppHomePlaceholder',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(393, 852);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+        // Scene 3: Floating ingredients emerge (1000ms)
+        await tester.pump(const Duration(milliseconds: 1000));
+        expect(find.byType(MagicFridgeScreen), findsOneWidget);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: DonutSpinScreen(),
-        ),
-      );
+        // Scene 4 & 5: Freshness ring & Brand reveal (1200ms)
+        await tester.pump(const Duration(milliseconds: 1200));
+        expect(find.byType(MagicFridgeScreen), findsOneWidget);
 
-      // 1. Plain dough drop at 200ms
-      await tester.pump(const Duration(milliseconds: 200));
-      var animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(animator.icingOpacity, 0.0);
-      expect(animator.sprinklesProgress, 0.0);
+        // Scene 6: Finish to NutriFridge home placeholder (1000ms)
+        await tester.pump(const Duration(milliseconds: 1000));
+        await tester.pumpAndSettle();
 
-      // 2. Icing splash & glaze reveal at 1000ms
-      await tester.pump(const Duration(milliseconds: 800));
-      animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(animator.icingOpacity, greaterThan(0.0));
+        expect(find.byType(NutriFridgeHomePlaceholder), findsOneWidget);
+        expect(find.text('Your fridge, smarter.'), findsOneWidget);
 
-      // 3. Sprinkle cascade at 1800ms
-      await tester.pump(const Duration(milliseconds: 800));
-      animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(animator.icingOpacity, 1.0);
-      expect(animator.sprinklesProgress, greaterThan(0.0));
+        // Test Replay button
+        final replayButton = find.byTooltip('Replay Magic Fridge Splash');
+        expect(replayButton, findsOneWidget);
+        await tester.tap(replayButton);
+        await tester.pump();
 
-      // 4. Sprinkles settled at 2200ms
-      await tester.pump(const Duration(milliseconds: 400));
-      animator = tester.widget<DonutFrameAnimator>(find.byType(DonutFrameAnimator));
-      expect(animator.sprinklesProgress, 1.0);
+        // Fast forward again
+        await tester.pump(const Duration(milliseconds: 4300));
+        await tester.pumpAndSettle();
+        expect(find.byType(NutriFridgeHomePlaceholder), findsOneWidget);
 
-      // 5. Completion & interactive AppHomePlaceholder at 3000ms
-      await tester.pump(const Duration(milliseconds: 800));
-      await tester.pumpAndSettle();
-      expect(find.byType(AppHomePlaceholder), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(AppHomePlaceholder),
-          matching: find.text('Donut Spin'),
-        ),
-        findsOneWidget,
-      );
-    });
+        // Test Back navigation to gallery
+        final backButton = find.byTooltip('Back to Gallery');
+        expect(backButton, findsOneWidget);
+        await tester.tap(backButton);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(GalleryScreen), findsOneWidget);
+        expect(find.byType(MagicFridgeScreen), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'MagicFridgeScreen renders cleanly on mobile viewports without overflow',
+      (WidgetTester tester) async {
+        for (final size in [const Size(393, 852), const Size(360, 640)]) {
+          tester.view.physicalSize = size;
+          tester.view.devicePixelRatio = 1.0;
+
+          await tester.pumpWidget(const MaterialApp(home: MagicFridgeScreen()));
+
+          // Frame 0ms
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+
+          // Frame 1500ms (door open, ingredients flying)
+          await tester.pump(const Duration(milliseconds: 1500));
+          expect(tester.takeException(), isNull);
+
+          // Frame 3000ms (orbital freshness ring)
+          await tester.pump(const Duration(milliseconds: 1500));
+          expect(tester.takeException(), isNull);
+
+          // Frame 4300ms (destination)
+          await tester.pump(const Duration(milliseconds: 1300));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          expect(find.byType(NutriFridgeHomePlaceholder), findsOneWidget);
+        }
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      },
+    );
   });
 }

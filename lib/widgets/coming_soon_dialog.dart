@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/design_concept.dart';
 import '../theme/app_theme.dart';
 import 'category_badge.dart';
@@ -41,7 +42,9 @@ void showComingSoonDialog(BuildContext context, DesignConcept concept) {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.softLavender,
                             borderRadius: BorderRadius.circular(8),
@@ -114,8 +117,10 @@ void showComingSoonDialog(BuildContext context, DesignConcept concept) {
                 // Status banner
                 Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.background,
                     borderRadius: BorderRadius.circular(12),

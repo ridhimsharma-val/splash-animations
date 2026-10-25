@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/design_concept.dart';
 import '../theme/app_theme.dart';
 import 'category_badge.dart';
@@ -10,11 +11,7 @@ class DesignCard extends StatefulWidget {
   final DesignConcept concept;
   final VoidCallback onTap;
 
-  const DesignCard({
-    super.key,
-    required this.concept,
-    required this.onTap,
-  });
+  const DesignCard({super.key, required this.concept, required this.onTap});
 
   @override
   State<DesignCard> createState() => _DesignCardState();
@@ -27,8 +24,7 @@ class _DesignCardState extends State<DesignCard> {
   @override
   Widget build(BuildContext context) {
     final concept = widget.concept;
-    final isPlaceholderReady =
-        concept.status == DesignStatus.activePlaceholder;
+    final isPlaceholderReady = concept.status == DesignStatus.activePlaceholder;
 
     final scale = _isPressed ? 0.98 : (_isHovered ? 1.015 : 1.0);
 
@@ -54,8 +50,8 @@ class _DesignCardState extends State<DesignCard> {
               border: Border.all(
                 color: _isHovered
                     ? (isPlaceholderReady
-                        ? AppColors.deepLavender.withValues(alpha: 0.45)
-                        : AppColors.primaryAccent)
+                          ? AppColors.deepLavender.withValues(alpha: 0.45)
+                          : AppColors.primaryAccent)
                     : AppColors.border,
                 width: _isHovered ? 1.5 : 1.0,
               ),
@@ -92,7 +88,9 @@ class _DesignCardState extends State<DesignCard> {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.softLavender,
                             borderRadius: BorderRadius.circular(8),
@@ -170,19 +168,21 @@ class _DesignCardState extends State<DesignCard> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: isPlaceholderReady
                             ? (_isHovered
-                                ? AppColors.deepLavender
-                                : AppColors.lavenderSurface)
+                                  ? AppColors.deepLavender
+                                  : AppColors.lavenderSurface)
                             : AppColors.background,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isPlaceholderReady
                               ? (_isHovered
-                                  ? AppColors.deepLavender
-                                  : AppColors.primaryAccent)
+                                    ? AppColors.deepLavender
+                                    : AppColors.primaryAccent)
                               : AppColors.border,
                         ),
                       ),
@@ -196,8 +196,8 @@ class _DesignCardState extends State<DesignCard> {
                               fontWeight: FontWeight.w700,
                               color: isPlaceholderReady
                                   ? (_isHovered
-                                      ? Colors.white
-                                      : AppColors.deepLavender)
+                                        ? Colors.white
+                                        : AppColors.deepLavender)
                                   : AppColors.textSecondary,
                             ),
                           ),
@@ -209,8 +209,8 @@ class _DesignCardState extends State<DesignCard> {
                             size: 14,
                             color: isPlaceholderReady
                                 ? (_isHovered
-                                    ? Colors.white
-                                    : AppColors.deepLavender)
+                                      ? Colors.white
+                                      : AppColors.deepLavender)
                                 : AppColors.textMuted,
                           ),
                         ],

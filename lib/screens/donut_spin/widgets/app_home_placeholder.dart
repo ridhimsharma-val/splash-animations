@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 class AppHomePlaceholder extends StatelessWidget {
   final double enterProgress; // 0.0 to 1.0
 
-  const AppHomePlaceholder({
-    super.key,
-    required this.enterProgress,
-  });
+  const AppHomePlaceholder({super.key, required this.enterProgress});
 
   @override
   Widget build(BuildContext context) {
